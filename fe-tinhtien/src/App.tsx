@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import './App.css';
 
-const BASE_URL = "http://localhost:8080/get-increasing-number";
+const BASE_URL = "/api/get-increasing-number";
 
 class App extends Component<{}, {displayNumber?: number}> {
   state = {
