@@ -2,7 +2,6 @@
   "compilerOptions": {
     "target": "es5",
     "allowJs": true,
-    "skipLibCheck": false,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
@@ -16,7 +15,5 @@
     "lib": ["es5", "es6", "dom"],
     "skipLibCheck": true
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }
