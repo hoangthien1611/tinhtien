@@ -37,6 +37,12 @@
           <artifactId>spring-boot-starter-tomcat</artifactId>
           <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>net.minidev</groupId>
+            <artifactId>json-smart</artifactId>
+            <version>2.3</version>
+        </dependency>
     </dependencies>
 
     <build>
