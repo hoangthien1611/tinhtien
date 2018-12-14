@@ -3,12 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@com.mgmtp.a12/plasma-design": "^24.6.0",
+    "@com.mgmtp.a12/widgets": "^24.6.0",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3"
+  },
+  "devDependencies": {
+    "@types/draft-js": "^0.10.26",
     "@types/jest": "23.3.10",
     "@types/node": "10.12.12",
     "@types/react": "16.7.13",
     "@types/react-dom": "16.0.11",
-    "react": "^16.6.3",
-    "react-dom": "^16.6.3",
+    "@types/recharts": "^1.1.5",
     "react-scripts": "2.1.1",
     "typescript": "3.2.2"
   },

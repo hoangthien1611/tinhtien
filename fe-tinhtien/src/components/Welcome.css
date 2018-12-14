@@ -1,0 +1,24 @@
+.welcome_form{
+    height: 400px;
+    position: relative;
+}
+.header{
+    font-size: 18px;
+    margin:0 ;
+    height: 50%;
+    background-color: #8c99a6;
+    text-align: center; 
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
+}
+.header h2{
+    padding: 10px;
+}
+.header h3{
+    margin-bottom: 10px;
+}
+.h2_nameActivity{
+    color:#c1f0c1;
+    front: 100% !important;
+}
+
+
