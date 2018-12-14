@@ -1,31 +1,30 @@
 package com.mgmtp.internship.tntbe.controllers;
 
+import com.mgmtp.internship.tntbe.entities.Activity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 import com.mgmtp.internship.tntbe.services.ActivityService;
 
 @RestController
+@RequestMapping("/api")
 public class ActivityController {
 
     @Autowired
     private ActivityService activityService;
 
-    private Map<String, String> activityMap = new HashMap();
-
     @PostMapping(value = "/activity")
-    public String getLinkFromActivityName(@RequestBody net.minidev.json.JSONObject data) {
+    public String saveNewActivity( @RequestBody net.minidev.json.JSONObject data ){
         String activityName = data.get("activity-name").toString();
-        if (activityService.isEmptyOrNull(activityName)) return "{\"error\": \"Activity Name is empty\"}";
-        String activityLink = activityService.generateLink(activityName);
-        activityMap.put(activityLink, activityName);
-        return "{ \"activity-link\": \"" + activityLink + "\"}";
+        return  activityService.saveNewActivity(activityName);
     }
 
     @GetMapping(value = "/activity/{code}")
     public String getActivityNameFromLink(@PathVariable String code) {
-        return "{ \"activity-name\": \"" + activityMap.get(code) + "\"}";
+        String nameActivity = activityService.getNameActivityByCode(code);
+        if (nameActivity == null ){
+            return "{\"error\": \"Activity doesn't exist!\"}";
+        } else {
+            return "{ \"activity-name\": \"" + activityService.getNameActivityByCode(code) + "\"}";
+        }
     }
 }
