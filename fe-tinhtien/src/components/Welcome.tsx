@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import './Welcome.css';
+import '../css/Welcome.css';
 
-const BASE_URL = "http://localhost:8080/activity";
 class Welcome extends Component<{}, {nameActivity: string}>{
     constructor(props:string){
         super(props);
@@ -18,7 +17,7 @@ class Welcome extends Component<{}, {nameActivity: string}>{
 
     async getNameActivity( hashUrl:string):Promise<void>{
         try{
-            const url :string = "http://localhost:8080/activity/"+hashUrl;
+            const url :string = "/activity/"+hashUrl;
             const result = await fetch(url);
             const activityName = (await result.json()) ;
             console.log(activityName["activity-name"])
