@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 @Service
 public class ActivityService {
@@ -50,5 +51,9 @@ public class ActivityService {
         if (activity!=null){
             return activity.getName();
         } else return null;
+    }
+
+    public List<Activity> getAll() {
+        return activityRepository.getAllByOrderByIdDesc();
     }
 }

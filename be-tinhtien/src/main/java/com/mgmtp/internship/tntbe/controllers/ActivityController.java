@@ -5,20 +5,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.mgmtp.internship.tntbe.services.ActivityService;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/activity")
 public class ActivityController {
 
     @Autowired
     private ActivityService activityService;
 
-    @PostMapping(value = "/activity")
+    @PostMapping(value = "")
     public String saveNewActivity( @RequestBody net.minidev.json.JSONObject data ){
         String activityName = data.get("activity-name").toString();
         return  activityService.saveNewActivity(activityName);
     }
 
-    @GetMapping(value = "/activity/{code}")
+    @GetMapping(value = "/{code}")
     public String getActivityNameFromLink(@PathVariable String code) {
         String nameActivity = activityService.getNameActivityByCode(code);
         if (nameActivity == null ){
@@ -26,5 +28,10 @@ public class ActivityController {
         } else {
             return "{ \"activity-name\": \"" + activityService.getNameActivityByCode(code) + "\"}";
         }
+    }
+
+    @GetMapping(value = "/")
+    public List<Activity> getAll() {
+        return activityService.getAll();
     }
 }
