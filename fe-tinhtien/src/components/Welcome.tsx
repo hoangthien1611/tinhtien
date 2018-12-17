@@ -17,7 +17,7 @@ class Welcome extends Component<{}, {nameActivity: string}>{
 
     async getNameActivity( hashUrl:string):Promise<void>{
         try{
-            const url :string = "/activity/"+hashUrl;
+            const url :string = "api/activity/"+hashUrl;
             const result = await fetch(url);
             const activityName = (await result.json()) ;
             console.log(activityName["activity-name"])
@@ -39,7 +39,7 @@ class Welcome extends Component<{}, {nameActivity: string}>{
                     </div>
                 </div>
             </div>
-        ); 
+        );
     }
 
 }

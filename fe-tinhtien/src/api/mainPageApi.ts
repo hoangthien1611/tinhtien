@@ -1,5 +1,5 @@
 export const saveActivity = async (activityName: string): Promise<SaveActivityResponse> => {
-  const rawResult = await fetch("/activity", {
+  const rawResult = await fetch("api/activity", {
     method: "post",
     headers: {
       "Content-type": "application/json",
