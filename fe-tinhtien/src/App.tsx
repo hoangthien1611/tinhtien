@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import "@com.mgmtp.a12/plasma-design/dist/plasma.css";
 import "./App.css";
-import Overview from "./pages/Overview";
 
 const BASE_URL = "http://localhost:8080/get-increasing-number";
 
@@ -22,7 +21,6 @@ class App extends Component<{}, { displayNumber?: number }> {
     return (
       <div>
         <label>Hello, number {this.state.displayNumber}</label>
-        <Overview />
       </div>
     );
   }
