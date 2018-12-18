@@ -8,7 +8,7 @@ import com.mgmtp.internship.tntbe.services.ActivityService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/activity")
+@RequestMapping("/api/activity")
 public class ActivityController {
 
     @Autowired
