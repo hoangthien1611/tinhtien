@@ -5,7 +5,9 @@
         xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
     http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
-    <include file="changesets/create_dummy_table.xml" relativeToChangelogFile="true"/>
     <include file="changesets/create_activity_table.xml" relativeToChangelogFile="true"/>
+    <include file="changesets/create_person_table.xml" relativeToChangelogFile="true"/>
+    <include file="changesets/create_expense_table.xml" relativeToChangelogFile="true"/>
+    <!--<includeAll path="src/main/resources/liquibase/changesets"/>-->
 </databaseChangeLog>
 
