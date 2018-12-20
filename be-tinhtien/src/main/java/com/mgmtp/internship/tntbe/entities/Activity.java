@@ -6,7 +6,6 @@ import javax.persistence.*;
 @Data
 @Entity
 @Table(name = "activity")
-
 public class Activity {
 
     @Column(name = "id")
@@ -20,5 +19,11 @@ public class Activity {
     @Column(name = "url")
     private String url;
 
+    public Activity(String name, String url) {
+        this.name = name;
+        this.url = url;
+    }
+
+    public Activity(){}
 }
 

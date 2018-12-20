@@ -1,4 +1,7 @@
 package com.mgmtp.internship.tntbe.services;
+
+import com.mgmtp.internship.tntbe.dto.ActivityDTO;
+import com.mgmtp.internship.tntbe.dto.ErrorMessage;
 import com.mgmtp.internship.tntbe.entities.Activity;
 import com.mgmtp.internship.tntbe.repositories.ActivityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -16,40 +21,39 @@ public class ActivityService {
     @Autowired
     ActivityRepository activityRepository;
 
-    public String generateLink(String activityName) {
-        String temp = "";
+    private String generateLink(String activityName) {
+        String link = "";
         try {
-            byte[] bytesOfMessage = (activityName + System.currentTimeMillis()).getBytes("UTF-8");
+            byte[] bytesOfMessage = (activityName + System.currentTimeMillis()).getBytes(StandardCharsets.UTF_8);
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             byte[] theDigest = md5.digest(bytesOfMessage);
             BigInteger bigInt = new BigInteger(1, theDigest);
-            temp = bigInt.toString(16);
+            link = bigInt.toString(16);
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println(e.getMessage());
         }
-        catch (NoSuchAlgorithmException | UnsupportedEncodingException e) { }
-        return temp.substring(0, 6);
+        return link.substring(0, 6);
     }
 
-    public boolean isEmptyOrNull(String string) {
-        return string == null || string.trim().equals("");
-    }
-
-    public String saveNewActivity(String name){
-        if (isEmptyOrNull(name)) {
-            return "{\"error\": \"Activity Name is empty\"}";
+    public Object saveNewActivity(String name) {
+        if (name == null || name.isEmpty()) {
+            return new ErrorMessage("Activity Name is empty");
         } else {
             String url = generateLink(name);
-            Activity activity = new Activity();
-            activity.setName(name);
-            activity.setUrl(url);
-            Activity newActivity = activityRepository.save(activity);
-            return "{ \"activity-link\": \"" + newActivity.getUrl() + "\"}";
+            Activity activity = new Activity(name, url);
+            activity = activityRepository.save(activity);
+            if (activity == null) {
+                return new ErrorMessage("Save activity failure");
+            } else {
+                return new ActivityDTO(name, activity.getUrl());
+            }
         }
     }
 
-    public String getNameActivityByCode(String code) {
-        Activity activity = activityRepository.findByUrl(code);
-        if (activity!=null){
-            return activity.getName();
+    public ActivityDTO getActivity(String url) {
+        Activity activity = activityRepository.findByUrl(url);
+        if (activity != null) {
+            return new ActivityDTO(activity.getName(), activity.getUrl());
         } else return null;
     }
 
