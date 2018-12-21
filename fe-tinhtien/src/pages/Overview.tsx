@@ -44,7 +44,7 @@ export default class Overview extends React.Component<
       const url: string = "api/activity/" + hashUrl;
       const result = await fetch(url);
       const activityNameJson = await result.json();
-      this.setState({ activityName: activityNameJson["activity-name"] });
+      this.setState({ activityName: activityNameJson["name"] });
     } catch (error) {
       console.log(error);
     }
