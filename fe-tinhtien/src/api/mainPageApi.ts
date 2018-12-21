@@ -5,7 +5,7 @@ export const saveActivity = async (activityName: string): Promise<SaveActivityRe
       "Content-type": "application/json",
       "Accept": "application/json"
     },
-    body: JSON.stringify({ "activity-name": activityName }),
+    body: JSON.stringify({ "name": activityName }),
   });
   return parseToSaveActivityResponse(await rawResult.json())
 }
@@ -21,7 +21,7 @@ function parseToSaveActivityResponse(input: any): SaveActivityResponse {
     result.errorMessage = input.error
   } else {
     result.hasError = false
-    result.activityUrl = input["activity-link"]
+    result.activityUrl = input["url"]
   }
   return result
 }

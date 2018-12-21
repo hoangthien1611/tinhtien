@@ -20,8 +20,8 @@ class Welcome extends Component<{}, {nameActivity: string}>{
             const url :string = "api/activity/"+hashUrl;
             const result = await fetch(url);
             const activityName = (await result.json()) ;
-            console.log(activityName["activity-name"])
-            this.setState({nameActivity:activityName["activity-name"]});
+            console.log(activityName["name"])
+            this.setState({nameActivity:activityName["name"]});
         }
         catch(error){
             console.log(error)
