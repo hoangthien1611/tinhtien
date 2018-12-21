@@ -1,5 +1,4 @@
 import * as React from "react";
-import "@com.mgmtp.a12/plasma-design/dist/plasma.css";
 import {
   ApplicationFrame,
   MenuItem,
@@ -7,6 +6,7 @@ import {
   FlyoutMenu
 } from "@com.mgmtp.a12/widgets";
 import { RouteComponentProps } from "react-router-dom";
+import { PeopleScreen } from "../components/PeopleScreen";
 
 const menuItems = [
   { label: "People" },
@@ -14,68 +14,72 @@ const menuItems = [
   { label: "Balance" }
 ];
 
-interface State {
-  menuIndex: number;
+interface OverviewState {
+  activeMenu: string;
   activityName: string;
+  activityUrl: string;
 }
 
-interface MainOverviewProps extends RouteComponentProps<any> {}
+interface OverviewProps extends RouteComponentProps<any> { }
 
-export default class Overview extends React.Component<
-  MainOverviewProps,
-  State
-> {
-  state: State = {
-    menuIndex: 0,
-    activityName: ""
-  };
+export default class Overview extends React.Component<OverviewProps, OverviewState> {
+  constructor(props: OverviewProps) {
+    super(props);
+
+    this.state = {
+      activeMenu: "People",
+      activityName: "",
+      activityUrl: this.props.match.params.code
+    }
+  }
 
   async componentDidMount(): Promise<void> {
-    this.getActivityName(this.props.match.params.code);
+    await this.getActivityName(this.props.match.params.code);
     if (this.props.history.action === "POP") {
       this.setState({
-        menuIndex: 1
+        activeMenu: "Expenses"
       });
     }
   }
 
-  async getActivityName(hashUrl: string): Promise<void> {
+  async getActivityName(activityUrl: string): Promise<void> {
     try {
-      const url: string = "api/activity/" + hashUrl;
+      const url: string = "api/activity/" + activityUrl;
       const result = await fetch(url);
-      const activityNameJson = await result.json();
-      this.setState({ activityName: activityNameJson["name"] });
+      const activity = await result.json();
+      this.setState({
+        activityName: activity.name
+      });
     } catch (error) {
       console.log(error);
     }
   }
 
   private getMenuItems(): MenuItem[] {
-    return menuItems.map((item, index) => ({
+    return menuItems.map((item) => ({
       ...item,
-      selected: this.state.menuIndex === index,
-      onClick: () => this.setState({ menuIndex: index })
+      selected: this.state.activeMenu === item.label,
+      onClick: () => this.setState({ activeMenu: item.label })
     }));
   }
 
   render(): React.ReactNode {
-    const { menuIndex, activityName } = this.state;
+    const { activeMenu, activityName, activityUrl } = this.state;
 
     return (
-      <div>
-        <ApplicationFrame
-          main={
-            <div>
-              <ApplicationHeader leftSlots="TNT" />
-              <FlyoutMenu type="horizontal" items={this.getMenuItems()} />
-            </div>
-          }
-          sub={undefined}
-          content={
-            "Activity: " + activityName + " - " + menuItems[menuIndex].label
-          }
-        />
-      </div>
+      <ApplicationFrame
+        main={
+          <div>
+            <ApplicationHeader leftSlots="TNT" />
+            <FlyoutMenu type="horizontal" items={this.getMenuItems()} />
+          </div>
+        }
+        content={
+          activeMenu === "People"
+            ? <PeopleScreen activityUrl={activityUrl} />
+            : activeMenu
+        }
+      />
     );
   }
 }
