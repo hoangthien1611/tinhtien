@@ -7,6 +7,8 @@ import {
 } from "@com.mgmtp.a12/widgets";
 import { RouteComponentProps } from "react-router-dom";
 import { PeopleScreen } from "../components/PeopleScreen";
+import ExpenseScreen from "../components/expense/ExpenseContent";
+
 
 const menuItems = [
   { label: "People" },
@@ -77,7 +79,7 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
         content={
           activeMenu === "People"
             ? <PeopleScreen activityUrl={activityUrl} />
-            : activeMenu
+            : (activeMenu === "Expense" ? <ExpenseScreen title="Expense" /> : activeMenu)
         }
       />
     );

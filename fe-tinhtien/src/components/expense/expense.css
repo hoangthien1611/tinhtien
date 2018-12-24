@@ -1,0 +1,26 @@
+/* .list-item__graphic {
+  width: 85px;
+} */
+.person-name,
+.amount-expense,
+.expense-name {
+  font-weight: bold;
+}
+.person-name {
+  color: red;
+}
+.amount-expense {
+  color: blue;
+}
+.expense-name {
+  color: green;
+}
+.btn-add-expense {
+  position: absolute;
+  right: 40px;
+  margin-top: 10px;
+}
+.wrapper {
+  max-width: 800px;
+  margin: auto;
+}
