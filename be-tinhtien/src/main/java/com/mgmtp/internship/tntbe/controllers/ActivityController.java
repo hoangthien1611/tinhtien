@@ -23,10 +23,19 @@ public class ActivityController {
 
     @GetMapping(value = "/{url}")
     public Object getActivity(@PathVariable String url) {
-        if (activityService.getActivity(url) == null){
+        if (activityService.getActivity(url) == null) {
             return new ErrorMessage("Activity doesn't exist!");
         }
         return activityService.getActivity(url);
+    }
+
+    @GetMapping(value = "/{url}/persons")
+    public Object getActivityWithPersonAndExpense(@PathVariable String url) {
+        ActivityDTO activity = activityService.getActivityWithPersonAndExpense(url);
+        if (activity == null) {
+            return new ErrorMessage("Activity doesn't exist!");
+        }
+        return activity;
     }
 
     @GetMapping(value = "/")

@@ -2,19 +2,20 @@ package com.mgmtp.internship.tntbe.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.List;
 
-
 @Data
 @Entity
 @Table(name = "activity")
+@NoArgsConstructor
 public class Activity {
 
     @Column(name = "id")
     @Id
-    @GeneratedValue( strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "name")
@@ -27,12 +28,8 @@ public class Activity {
     @JsonIgnore
     private List<Person> persons;
 
-
     public Activity(String name, String url) {
         this.name = name;
         this.url = url;
     }
-
-    public Activity(){}
 }
-
