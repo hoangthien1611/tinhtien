@@ -21,5 +21,7 @@
             </column>
         </createTable>
     </changeSet>
-
+    <changeSet id="edit_column_name_of_person_table" author="dtacao">
+        <renameColumn tableName="person" oldColumnName="isActived" newColumnName="is_actived"></renameColumn>
+    </changeSet>
 </databaseChangeLog>

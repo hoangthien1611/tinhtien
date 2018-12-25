@@ -47,17 +47,22 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                 </List >
                 {
                     showInput
-                        ? <TextLineStateless
-                            value={enteringName}
-                            onChange={event => this.handleChange(event.target.value)}
-                            placeholder={appConstant.placeholder.ENTER_NAME}
-                            onKeyDown={event => this.handleKeyDown(event.key)}
-                            errorMessage={this.validateInput(enteringName)}
-                            rightButton={
-                                <Button title='Clear' icon={closeIcon} onClick={this.onClearButtonClick} />
-                            }
-                        />
-                        : <Button title='Add Person' primary icon={addIcon} onClick={this.onAddButtonClick} />
+                        ? <>
+                            <TextLineStateless
+                                autoFocus={true}
+                                value={enteringName}
+                                onChange={event => this.handleChange(event.target.value)}
+                                placeholder={appConstant.placeholder.ENTER_NAME}
+                                onKeyDown={event => this.handleKeyDown(event.key)}
+                                errorMessage={this.validateInput(enteringName)}
+                                rightButton={
+                                    <Button title='Clear' icon={closeIcon} onClick={this.onClearButtonClick} />
+                                }
+                            />
+                            <Button title='Save' label="Save" primary style={{ float: "right" }} onClick={this.onSaveButtonClick} />
+                            <Button title='Cancel' label="Cancel" destructive primary style={{ float: "right" }} onClick={this.onCanceluttonClick} />
+                        </>
+                        : <Button title='Add Person' style={{ float: "right" }} iconButton primary icon={addIcon} onClick={this.onAddButtonClick} />
                 }
             </>
 
@@ -69,7 +74,9 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     };
 
     onDeletePerson = async (person: Person): Promise<void> => {
-        alert('delete ' + person.name);
+        this.setState({
+            persons: this.state.persons.filter(p => p.id !== person.id),
+        });
     };
 
     onAddButtonClick = (): void => {
@@ -79,33 +86,62 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     }
 
     onClearButtonClick = (): void => {
-        alert('clear ');
         this.setState({
             enteringName: ""
         })
     }
 
-    private handleChange = (value: string): void => {
+    onSaveButtonClick = (): void => {
+        this.addPerson();
+    }
+
+    onCanceluttonClick = (): void => {
+        this.setState({
+            showInput: false
+        })
+    }
+
+    handleChange = (value: string): void => {
         this.setState({
             enteringName: value
         })
     }
 
-    private handleKeyDown(key: string): void {
+    handleKeyDown(key: string): void {
         if (key === "Enter") {
             this.addPerson();
         }
+        if (key === "Escape") {
+            this.setState({
+                showInput: false
+            })
+        }
     }
 
-    private addPerson(): void {
-        alert('add person: ' + this.state.enteringName);
-        this.setState({
-            enteringName: undefined,
-            showInput: false
-        })
+    async addPerson(): Promise<void> {
+        try {
+            const { enteringName, persons } = this.state;
+            const { activityUrl } = this.props;
+            const response = await fetch('api/person', {
+                method: "POST",
+                body: JSON.stringify({ name: enteringName, activityUrl }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            const newPerson = (await response.json()) as Person;
+            this.setState({
+                persons: [...persons, newPerson],
+                enteringName: undefined,
+                showInput: false
+            });
+        } catch (error) {
+            console.log(error);
+        }
+
     }
 
-    private validateInput(enteringName?: string): string {
+    validateInput(enteringName?: any): string {
         const trimmedName = enteringName ? enteringName.toLowerCase().trim() : "";
         if (trimmedName.length === 0) {
             return appConstant.THE_NAME_MUST_NOT_BE_EMPTY_OR_WHITESPACE;
