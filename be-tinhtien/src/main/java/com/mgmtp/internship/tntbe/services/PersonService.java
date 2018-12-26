@@ -25,4 +25,12 @@ public class PersonService {
         }
         return new ErrorMessage("Activity doesn't exist");
     }
+
+    public Object getPersons(String activityUrl) {
+        Activity activity = activityRepository.findByUrl(activityUrl);
+        if (activity != null){
+            return activity.getPersons();
+        }
+        return new ErrorMessage("Activity doesn't exist");
+    }
 }

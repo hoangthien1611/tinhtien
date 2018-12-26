@@ -1,10 +1,7 @@
 package com.mgmtp.internship.tntbe.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import net.minidev.json.annotate.JsonIgnore;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 import javax.persistence.*;
 
 @Data
@@ -20,17 +17,20 @@ public class Person {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "isActived")
-    private boolean isActived;
+    @Column(name = "active")
+    private boolean active;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "activity_id", nullable = false)
     @JsonIgnore
     private Activity activity;
 
-    public Person(String name, boolean isActived, Activity activity) {
+    public Person(String name, boolean active, Activity activity) {
         this.name = name;
-        this.isActived = isActived;
+        this.active = active;
         this.activity = activity;
+    }
+
+    public Person() {
     }
 }

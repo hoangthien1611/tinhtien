@@ -1,16 +1,12 @@
 package com.mgmtp.internship.tntbe.controllers;
 
 import com.mgmtp.internship.tntbe.dto.PersonDTO;
-import com.mgmtp.internship.tntbe.services.ActivityService;
 import com.mgmtp.internship.tntbe.services.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/person")
+@RequestMapping("/api/person")
 public class PersonController {
 
     @Autowired
@@ -19,6 +15,11 @@ public class PersonController {
     @PostMapping("")
     public Object saveNewPerson(@RequestBody PersonDTO personDTO) {
         return personService.saveNewPerson(personDTO);
+    }
+
+    @GetMapping("/{activityUrl}")
+    public  Object getPersons(@PathVariable String activityUrl){
+        return personService.getPersons(activityUrl);
     }
 
 

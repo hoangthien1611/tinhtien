@@ -24,4 +24,8 @@
     <changeSet id="edit_column_name_of_person_table" author="dtacao">
         <renameColumn tableName="person" oldColumnName="isActived" newColumnName="is_actived"></renameColumn>
     </changeSet>
+    <changeSet id="rename_column_name_of_person_table" author="dtacao">
+        <renameColumn tableName="person" oldColumnName="is_actived" newColumnName="active"></renameColumn>
+    </changeSet>
+
 </databaseChangeLog>

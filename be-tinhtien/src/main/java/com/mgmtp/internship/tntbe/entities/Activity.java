@@ -1,7 +1,11 @@
 package com.mgmtp.internship.tntbe.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+
 import javax.persistence.*;
+import java.util.List;
+
 
 @Data
 @Entity
@@ -18,6 +22,11 @@ public class Activity {
 
     @Column(name = "url")
     private String url;
+
+    @OneToMany(mappedBy = "activity")
+    @JsonIgnore
+    private List<Person> persons;
+
 
     public Activity(String name, String url) {
         this.name = name;
