@@ -8,6 +8,7 @@
     <include file="changesets/create_activity_table.xml" relativeToChangelogFile="true"/>
     <include file="changesets/create_person_table.xml" relativeToChangelogFile="true"/>
     <include file="changesets/create_expense_table.xml" relativeToChangelogFile="true"/>
+    <include file="changesets/create_dummy_data_for_testing_expense.xml" relativeToChangelogFile="true"/>
     <!--<includeAll path="src/main/resources/liquibase/changesets"/>-->
 </databaseChangeLog>
 

@@ -79,7 +79,7 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
         content={
           activeMenu === "People"
             ? <PeopleScreen activityUrl={activityUrl} />
-            : (activeMenu === "Expense" ? <ExpenseScreen title="Expense" /> : activeMenu)
+            : (activeMenu === "Expense" ? <ExpenseScreen title="Expense" activityUrl={activityUrl}/> : activeMenu)
         }
       />
     );

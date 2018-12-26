@@ -28,9 +28,13 @@
     "start": "npm run copy-assets && npm run compile-stylus && react-scripts start",
     "build": "npm run copy-assets && npm run compile-stylus && react-scripts build",
     "test": "react-scripts test",
+<<<<<<< 96ccce81ad681117df21122e21e83ba96a2f085d
     "eject": "react-scripts eject",
     "copy-assets": "mkdirp src/design && ncp node_modules/@com.mgmtp.a12/plasma-design/assets/ src/design/assets/ -Force",
     "compile-stylus": "mkdirp src/design/dist && stylus src/stylus/project.styl -o src/design/dist/project.css"
+=======
+    "eject": "react-scripts eject"
+>>>>>>> TNT-33 Add expense
   },
   "eslintConfig": {
     "extends": "react-app"

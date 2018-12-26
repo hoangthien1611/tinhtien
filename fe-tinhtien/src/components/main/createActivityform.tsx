@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, TextLineStateless } from "@com.mgmtp.a12/widgets";
 import { RouteComponentProps, withRouter } from "react-router-dom";
-import { saveActivity } from "../../api/mainPageApi";
+import { saveActivity } from "../../api/activityApi";
 import {
   checkValidActivityName,
   ValidActivityResult

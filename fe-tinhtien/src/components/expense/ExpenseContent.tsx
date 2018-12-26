@@ -1,6 +1,5 @@
 import * as React from "react";
-import "@com.mgmtp.a12/plasma-design/dist/plasma.css";
-import "./expense.css";
+import "../../css/expense.css";
 
 import {
   List,
@@ -10,57 +9,49 @@ import {
   ProgressIndicator
 } from "@com.mgmtp.a12/widgets";
 
-import callApi from "../../utils/apiCaller";
+import { addExpense, getExpenses } from "../../api/expenseApi";
 import commafy from "../../utils/amountFormatter";
-import { Expense } from "../../models/Expense";
+import AddExpenseDialog from "./AddExpenseDialog"
+import Expense from "../../models/Expense";
+import Person from "../../models/Person";
 
 export interface ExpenseScreenProps {
   title: string;
+  activityUrl: string;
 }
+
 export interface ExpenseScreenState {
   expenses: Expense[];
   loading: boolean;
+  addingExpense: boolean;
 }
-
-// Run `npm run start-server` to start the fake server
-const BASE_URL = "http://localhost:8080/expenses";
 
 export default class ExpenseScreen extends React.Component<
   ExpenseScreenProps,
   ExpenseScreenState
-> {
+  > {
   state: ExpenseScreenState = {
     expenses: [],
-    loading: false
+    loading: false,
+    addingExpense: false
   };
 
   async componentDidMount(): Promise<void> {
-    try {
-      this.toggleLoading();
-      const response = await callApi(BASE_URL);
-      if (!response.ok) {
-        throw Error(response.statusText);
-      }
-      const responseJson = await response.json();
-      if (responseJson.error) {
-        throw Error(responseJson.error);
-      }
-      this.setState(
-        {
-          expenses: responseJson
-        },
-        () => {
-          this.toggleLoading();
-        }
-      );
-    } catch (error) {
-      this.toggleLoading();
-      console.log(error);
-    }
+    this.toggleLoading();
+    getExpenses(this.props.activityUrl,
+      (expenses: Expense[]) => {
+        this.setState({ expenses })
+      },
+      (errorMessage: string) => {
+        console.log(errorMessage);
+      },
+      () => {
+        this.toggleLoading();
+      })
   }
 
   onClickAddButton = (): void => {
-    alert("Clicked add expense!");
+    this.setState({ addingExpense: true })
   };
 
   toggleLoading = (): void => {
@@ -75,7 +66,7 @@ export default class ExpenseScreen extends React.Component<
     return (
       <>
         <div>
-          <List divider border>
+          <List id="list-expense" divider border>
             {this.renderExpenses(expenses)}
           </List>
           <Button
@@ -87,12 +78,22 @@ export default class ExpenseScreen extends React.Component<
             title="Add expense"
           />
         </div>
+        {this.state.addingExpense &&
+          <AddExpenseDialog
+            people={[
+              { id: 1, name: "tri" },
+              { id: 2, name: "vu" },
+            ]}
+            onAddExpense={this.handleAddExpense}
+            onClose={() => { this.setState({ addingExpense: false }) }}
+          />
+        }
         {loading && <ProgressIndicator />}
       </>
     );
   }
 
-  renderExpenses = (expenses: any[]): React.ReactNode => {
+  private renderExpenses = (expenses: any[]): React.ReactNode => {
     let result: any[] = [];
 
     result = expenses.map((item, index) => {
@@ -119,13 +120,29 @@ export default class ExpenseScreen extends React.Component<
     return result;
   };
 
-  generateExpenseText(person: string, expenseName: string, amount: number) {
+  private generateExpenseText(person: Person, expenseName: string, amount: number) {
     return (
       <TextOutput>
-        <span className="person-name">{person}</span> paid{" "}
+        <span className="person-name">{person.name}</span> paid{" "}
         <span className="amount-expense">{commafy(amount)} ₫</span> for{" "}
         <span className="expense-name">{expenseName}</span>.
       </TextOutput>
     );
+  }
+
+  private handleAddExpense = (selectedPerson: number, description: string, amount: number, date: Date) => {
+    this.toggleLoading();
+    addExpense(selectedPerson, description, amount, date,
+      (expense: Expense) => {
+        const expenses = this.state.expenses.concat(expense);
+        this.setState({ expenses })
+      },
+      (errorMessage: string) => {
+        console.log(errorMessage)
+      },
+      () => {
+        this.toggleLoading();
+      }
+    )
   }
 }

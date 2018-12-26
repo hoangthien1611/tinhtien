@@ -32,12 +32,8 @@ public class ExpenseService {
             return new ErrorMessage("Item name is too long, it must be no larger than 255 characters!");
         }
 
-        else if(expenseDTO.getAmount() < 1000) {
-            return new ErrorMessage("Amount must be larger than 1000 vnd!");
-        }
-
-        else if(expenseDTO.getCreatedDate().before(new Date())) {
-            return new ErrorMessage("Invalid created date");
+        else if(expenseDTO.getAmount() <= 0) {
+            return new ErrorMessage("Amount must be larger than 0 vnd!");
         }
 
         else {

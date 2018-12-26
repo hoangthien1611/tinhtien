@@ -23,7 +23,7 @@ public class Expense {
         this.createdDate = createdDate;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "person_id", nullable = false)
     private DummyPerson person;
 

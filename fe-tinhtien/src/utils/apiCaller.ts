@@ -1,6 +1,6 @@
 export default function callApi(
   url: string,
-  method: string = "GET",
+  method: string,
   body?: any
 ) {
   return fetch(url, {
@@ -10,5 +10,23 @@ export default function callApi(
       Accept: "application/json"
     },
     body: JSON.stringify(body)
-  });
+  }).then(
+    rawResult => { return rawResult.json() }
+  );
+}
+
+export function addData(url: string, body?: any): Promise<any> {
+  return callApi(url, "POST", body);
+}
+
+export function updateData(url: string, body?: any): Promise<any> {
+  return callApi(url, "PUT", body);
+}
+
+export function getData(url: string, body?: any): Promise<any> {
+  return callApi(url, "GET", body);
+}
+
+export function deleteData(url: string, body?: any): Promise<any> {
+  return callApi(url, "DELETE", body);
 }
