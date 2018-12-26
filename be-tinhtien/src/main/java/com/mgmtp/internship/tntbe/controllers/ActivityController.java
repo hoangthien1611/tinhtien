@@ -9,7 +9,7 @@ import com.mgmtp.internship.tntbe.entities.Activity;
 import com.mgmtp.internship.tntbe.services.ActivityService;
 
 @RestController
-@RequestMapping("/activity")
+@RequestMapping("/api/activity")
 public class ActivityController {
 
     @Autowired
