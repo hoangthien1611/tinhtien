@@ -3,7 +3,6 @@ import { List, TextLineStateless, Icon, Button } from "@com.mgmtp.a12/widgets";
 import { Person } from "../models/person";
 import { PersonItem } from "./PersonItem";
 import appConstant from '../utils/appConstant';
-import * as mockData from '../mockdata/mockData.json';
 
 const addIcon = <Icon>add</Icon>;
 const closeIcon = <Icon>close</Icon>;
@@ -22,9 +21,27 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     constructor(props: PeopleScreenProps) {
         super(props);
         this.state = {
-            persons: mockData.persons,
+            persons: [],
             enteringName: undefined,
             showInput: false,
+        }
+    }
+
+    async componentDidMount(): Promise<void> {
+        await this.getListPerson(this.props.activityUrl);
+    }
+
+    async getListPerson(activityUrl: string): Promise<void> {
+        try {
+            const url: string = "api/person/" + activityUrl;
+            const result = await fetch(url);
+            const persons = await result.json() as Person[];
+            const personsFiltered = persons.filter(person => person.active)
+            this.setState({
+                persons: personsFiltered
+            });
+        } catch (error) {
+            console.log(error);
         }
     }
 
@@ -75,7 +92,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
 
     onDeletePerson = async (person: Person): Promise<void> => {
         this.setState({
-            persons: this.state.persons.filter(p => p.id !== person.id),
+            persons: this.state.persons.filter(p => p.id !== person.id)
         });
     };
 
@@ -119,26 +136,27 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     }
 
     async addPerson(): Promise<void> {
-        try {
-            const { enteringName, persons } = this.state;
-            const { activityUrl } = this.props;
-            const response = await fetch('api/person', {
-                method: "POST",
-                body: JSON.stringify({ name: enteringName, activityUrl }),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            const newPerson = (await response.json()) as Person;
-            this.setState({
-                persons: [...persons, newPerson],
-                enteringName: undefined,
-                showInput: false
-            });
-        } catch (error) {
-            console.log(error);
+        const { enteringName, persons } = this.state;
+        const { activityUrl } = this.props;
+        // Add person if have no error
+        if (this.validateInput(enteringName) === "") {
+            try {
+                const response = await fetch('api/person', {
+                    method: "POST",
+                    body: JSON.stringify({ name: enteringName, activityUrl }),
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+                const newPerson = (await response.json()) as Person;
+                this.setState({
+                    persons: [...persons, newPerson],
+                    enteringName: undefined,
+                });
+            } catch (error) {
+                console.log(error);
+            }
         }
-
     }
 
     validateInput(enteringName?: any): string {
@@ -150,7 +168,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
             return person.name.toLowerCase() == trimmedName;
         });
         return matchedPersons.length > 0 ?
-            appConstant.PERSON_NAME_IS_ALREADY_EXIST :
+            appConstant.PERSON_NAME_ALREADY_EXISTS :
             ""
     }
 }
