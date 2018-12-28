@@ -4,13 +4,11 @@ import { Person } from "../models/person";
 import { PersonItem } from "./PersonItem";
 import appConstant from '../utils/appConstant';
 
-const addIcon = <Icon>add</Icon>;
 const closeIcon = <Icon>close</Icon>;
 
 interface PeopleScreenState {
     persons: Person[];
     enteringName?: string;
-    showInput: boolean;
 }
 
 interface PeopleScreenProps {
@@ -18,12 +16,12 @@ interface PeopleScreenProps {
 }
 
 export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScreenState> {
+    private inputRef: HTMLInputElement | null = null;
     constructor(props: PeopleScreenProps) {
         super(props);
         this.state = {
             persons: [],
             enteringName: undefined,
-            showInput: false,
         }
     }
 
@@ -46,40 +44,46 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     }
 
     render(): React.ReactNode {
-        const { persons, showInput, enteringName } = this.state;
-
+        let { persons, enteringName } = this.state;
+        enteringName = enteringName ? enteringName : "";
         return (
             <>
-                <List divider border>
-                    {
-                        persons.map(p => {
-                            return <PersonItem
-                                person={p}
-                                key={p.id}
-                                onDelete={this.onDeletePerson}
-                                onEdit={this.onEditPerson}
-                            />
-                        })
-                    }
-                </List >
                 {
-                    showInput
-                        ? <>
-                            <TextLineStateless
-                                autoFocus={true}
-                                value={enteringName}
-                                onChange={event => this.handleChange(event.target.value)}
-                                placeholder={appConstant.placeholder.ENTER_NAME}
-                                onKeyDown={event => this.handleKeyDown(event.key)}
-                                errorMessage={this.validateInput(enteringName)}
-                                rightButton={
-                                    <Button title='Clear' icon={closeIcon} onClick={this.onClearButtonClick} />
-                                }
-                            />
-                            <Button title='Save' label="Save" primary style={{ float: "right" }} onClick={this.onSaveButtonClick} />
-                            <Button title='Cancel' label="Cancel" destructive primary style={{ float: "right" }} onClick={this.onCanceluttonClick} />
-                        </>
-                        : <Button title='Add Person' style={{ float: "right" }} iconButton primary icon={addIcon} onClick={this.onAddButtonClick} />
+                    persons.length > 0
+                        ? <List divider border>
+                            {
+                                persons.map(p => {
+                                    return <PersonItem
+                                        person={p}
+                                        key={p.id}
+                                        onDelete={this.onDeletePerson}
+                                        onEdit={this.onEditPerson}
+                                    />
+                                })
+                            }
+                        </List >
+                        : <div />
+                }
+                {
+                    <>
+                        <div className="field__message" hidden={enteringName.length !== 0 && this.validateInput(enteringName) !== ""}>
+                            <div className="field__messageIcon"><i className="plasma-icon">_</i></div>
+                            <div className="field__messageText"></div>
+                        </div>
+                        <TextLineStateless
+                            autoFocus={true}
+                            value={enteringName}
+                            onChange={event => this.handleChange(event.target.value)}
+                            placeholder={appConstant.placeholder.ENTER_NAME}
+                            onKeyDown={event => this.handleKeyDown(event.key)}
+                            errorMessage={enteringName.length !== 0 ? this.validateInput(enteringName) : ""}
+                            rightButton={
+                                <Button title='Clear' icon={closeIcon} onClick={this.onClearButtonClick} />
+                            }
+                            inputRef={instance => this.inputRef = instance}
+                        />
+                        <Button title='Save' label="Save" primary style={{ float: "right" }} disabled={this.validateInput(enteringName) !== ""} onClick={this.onSaveButtonClick} />
+                    </>
                 }
             </>
 
@@ -96,12 +100,6 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
         });
     };
 
-    onAddButtonClick = (): void => {
-        this.setState({
-            showInput: true
-        })
-    }
-
     onClearButtonClick = (): void => {
         this.setState({
             enteringName: ""
@@ -110,12 +108,6 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
 
     onSaveButtonClick = (): void => {
         this.addPerson();
-    }
-
-    onCanceluttonClick = (): void => {
-        this.setState({
-            showInput: false
-        })
     }
 
     handleChange = (value: string): void => {
@@ -128,11 +120,6 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
         if (key === "Enter") {
             this.addPerson();
         }
-        if (key === "Escape") {
-            this.setState({
-                showInput: false
-            })
-        }
     }
 
     async addPerson(): Promise<void> {
@@ -143,7 +130,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
             try {
                 const response = await fetch('api/person', {
                     method: "POST",
-                    body: JSON.stringify({ name: enteringName, activityUrl }),
+                    body: JSON.stringify({ name: this.trimName((enteringName || "").trim()), activityUrl }),
                     headers: {
                         "Content-Type": "application/json",
                     },
@@ -153,22 +140,32 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                     persons: [...persons, newPerson],
                     enteringName: undefined,
                 });
+                if (this.inputRef) {
+                    this.inputRef.focus();
+                }
             } catch (error) {
                 console.log(error);
             }
         }
     }
+    private trimName(name: string): string {
+        return name.trim().split(' ')
+            .filter(word => { return word.trim().length > 0 })
+            .join(' ');
+    }
 
-    validateInput(enteringName?: any): string {
-        const trimmedName = enteringName ? enteringName.toLowerCase().trim() : "";
+    private validateInput(enteringName?: string): string {
+        let trimmedName = this.trimName(enteringName ? enteringName.toLowerCase() : "");
         if (trimmedName.length === 0) {
-            return appConstant.THE_NAME_MUST_NOT_BE_EMPTY_OR_WHITESPACE;
+            return appConstant.errorMessage.THE_NAME_MUST_NOT_BE_EMPTY_OR_WHITESPACE;
         }
+        else if (trimmedName.length > 50)
+            return appConstant.errorMessage.PERSON_NAME_LENGTH;
         const matchedPersons = this.state.persons.filter(person => {
             return person.name.toLowerCase() == trimmedName;
         });
         return matchedPersons.length > 0 ?
-            appConstant.PERSON_NAME_ALREADY_EXISTS :
+            appConstant.errorMessage.PERSON_NAME_ALREADY_EXISTS :
             ""
     }
 }
