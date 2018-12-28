@@ -142,6 +142,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                 });
                 if (this.inputRef) {
                     this.inputRef.focus();
+                    this.inputRef.scrollIntoView(true);
                 }
             } catch (error) {
                 console.log(error);
