@@ -53,7 +53,7 @@ class CreateActivityForm extends React.Component<CreateActivityFormProps, Create
   render() {
     return (
       <div className="padding-top-10">
-        <div className="center col5">
+        <div className="center col-7">
           <TextLineStateless
             value={this.state.formValue}
             onChange={this.handleInputChange}
@@ -63,12 +63,12 @@ class CreateActivityForm extends React.Component<CreateActivityFormProps, Create
           />
           <Button
             label="Create your activity"
-            className="margin-top-5 center"
+            className="center"
             disabled={this.state.validateResult != ""}
             onClick={() => this.handleCreateActivity()}
           />
         </div>
-        <div className="margin-top-2 text-center warning">
+        <div className="text-center warning">
           {this.state.validateResult}
         </div>
       </div>
