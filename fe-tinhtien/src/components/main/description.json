@@ -1,0 +1,20 @@
+[
+  {
+    "_id": 0,
+    "icon": "alarm_on",
+    "title": "Save time",
+    "description": "Avoid time-consuming calculation of who needs to pay how much to whom."
+  },
+  {
+    "_id": 1,
+    "icon": "book",
+    "title": "Be Tranparent",
+    "description": "All expeneses are shown clearly to everyone. Share your activity with whomever you want."
+  },
+  {
+    "_id": 2,
+    "icon": "favorite",
+    "title": "Better Relationship",
+    "description": "No more arguments after each activity. This app will clear up any disagreements."
+  }
+]

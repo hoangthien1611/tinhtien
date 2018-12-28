@@ -6,7 +6,6 @@ import {
   checkValidActivityName,
   ValidActivityResult
 } from "./checkValidActivity";
-import "../../css/main.css";
 
 interface CreateActivityFormState {
   formValue: string;

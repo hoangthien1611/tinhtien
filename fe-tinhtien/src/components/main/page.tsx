@@ -1,28 +1,36 @@
 import React from "react";
 import CreateActivityForm from "./createActivityform";
+import { AppDescription } from "../../models/AppDescription";
+import Description from "./description";
 import {
   Button,
   ApplicationHeader,
   SizeContainer,
   SizeContainerElements,
-  PieChart,
-  Icon
+  Icon,
+  ButtonGroup
 } from "@com.mgmtp.a12/widgets";
+import { CSSTransition } from "react-transition-group";
 import "../../css/main.css";
-import logo from "../../images/logo.png";
+import minorLogo from "../../images/minor_logo.png";
+import mainLogo from "../../images/main_logo.png";
+import data from "./description.json";
 
-const { Row, Column } = SizeContainerElements;
+const { Row } = SizeContainerElements;
 
 interface MainPageState {
   showForm: boolean;
+  descriptionData: AppDescription;
 }
 
 export default class MainPage extends React.Component<{}, MainPageState> {
   constructor(props: {}) {
     super(props);
     this.state = {
-      showForm: false
+      showForm: false,
+      descriptionData: data[0]
     };
+    setInterval(this.nextDescription, 5000);
   }
 
   private showForm = () => {
@@ -33,31 +41,41 @@ export default class MainPage extends React.Component<{}, MainPageState> {
     this.setState({ showForm: false });
   };
 
+  private nextDescription = () => {
+    const curIndex = data.indexOf(this.state.descriptionData);
+    this.setState({
+      descriptionData: data[curIndex < data.length - 1 ? curIndex + 1 : 0]
+    });
+  };
+
+  private prevDescription = () => {
+    const curIndex = data.indexOf(this.state.descriptionData);
+    this.setState({
+      descriptionData: data[curIndex > 0 ? curIndex - 1 : data.length - 1]
+    });
+  };
+
   render() {
+    const { descriptionData } = this.state;
     return (
       <div className="main">
-        <ApplicationHeader leftSlots="TNT" className="header" />
+        <ApplicationHeader
+          leftSlots={[
+            <a href="#">
+              <img src={minorLogo} />
+            </a>,
+            <p>TinhTien</p>
+          ]}
+          rightSlots={<p>Manage team expenses</p>}
+          className="header"
+        />
         <SizeContainer noGutter>
-          <Row alignment="center">
+          <Row>
             <div className="top center">
-              <img src={logo} className="center logo" />
+              <img src={mainLogo} className="center" />
               <h3 className="text-center text-main">
-                Manage your team expenses
-              </h3>
-              <h4 className="text-center text-main">
-                Easy to pay and get pay back money from team member
-              </h4>
-              <h4 className="text-center text-main">
                 Hey, TinhTien is a shared expense manager for your activity.
-                Start by creating your activity with the button below
-              </h4>
-              <Icon
-                className="center text-center text-main"
-                custom
-                children={
-                  <Icon className="text-center icon-small">arrow_downward</Icon>
-                }
-              />
+              </h3>
               <div>
                 {this.state.showForm ? (
                   <>
@@ -67,7 +85,7 @@ export default class MainPage extends React.Component<{}, MainPageState> {
                     </Button>
                   </>
                 ) : (
-                  <Button className="center" onClick={this.showForm}>
+                  <Button className="center text-main" onClick={this.showForm}>
                     <h3>START YOUR ACTIVITY HERE!</h3>
                   </Button>
                 )}
@@ -75,52 +93,39 @@ export default class MainPage extends React.Component<{}, MainPageState> {
             </div>
           </Row>
           <Row>
-            <div className="bottom center" id="bottom">
-              <Row alignment="center">
-                <Column size={{ sm: 2, md: 2, lg: 4 }}>
-                  <Icon className="center text-center text-main icon">
-                    alarm_on
-                  </Icon>
-                  <h3 className="text-center text-main">Save Time</h3>
-                  <p className="text-center text-main">
-                    Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                    Cupiditate nisi voluptate dolores non voluptatibus corporis
-                    animi obcaecati rerum. Odio officiis aperiam similique
-                    itaque delectus eos tempore id laudantium reprehenderit
-                    quia!
-                  </p>
-                </Column>
-                <Column size={{ sm: 2, md: 2, lg: 4 }}>
-                  <Icon className="center text-center text-main icon">
-                    book
-                  </Icon>
-                  <h3 className="text-center text-main">Be Transparency</h3>
-                  <p className="text-center text-main">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Incidunt facere odit quisquam fugit maiores obcaecati ipsum
-                    animi ad, possimus fuga fugiat pariatur quo a, cupiditate
-                    officiis itaque in quos unde?
-                  </p>
-                </Column>
-                <Column size={{ sm: 4, md: 2, lg: 4 }}>
-                  <Icon className="center text-center text-main icon">
-                    favorite
-                  </Icon>
-                  <h3 className="text-center text-main">Better Ralationship</h3>
-                  <p className="text-center text-main">
-                    Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                    Nisi in illo maxime, adipisci dicta corporis beatae id.
-                    Animi quasi veritatis nisi quibusdam sequi tempore et
-                    praesentium a, non error! Repudiandae.
-                  </p>
-                </Column>
-              </Row>
+            <div className="center">
+              <CSSTransition
+                classNames="fade"
+                timeout={1000}
+                in={true}
+                appear={true}
+              >
+                <Description {...descriptionData} />
+              </CSSTransition>
             </div>
+          </Row>
+          <Row>
+            <ButtonGroup className="center">
+              <Button
+                iconButton
+                icon={<Icon>navigate_before</Icon>}
+                title="Back"
+                secondary
+                onClick={this.prevDescription}
+              />
+              <Button
+                iconButton
+                icon={<Icon>navigate_next</Icon>}
+                title="Next"
+                secondary
+                onClick={this.nextDescription}
+              />
+            </ButtonGroup>
           </Row>
         </SizeContainer>
         <footer className="footer">
           <address>
-            <p>Copyright 2018 © tinhtien.org. All rights reversed.</p>
+            <p>Copyright 2018 © mgm. All rights reversed.</p>
           </address>
         </footer>
       </div>
