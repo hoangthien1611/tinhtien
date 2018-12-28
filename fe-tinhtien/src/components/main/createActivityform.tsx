@@ -6,7 +6,6 @@ import {
   checkValidActivityName,
   ValidActivityResult
 } from "./checkValidActivity";
-import "@com.mgmtp.a12/plasma-design/dist/plasma.css";
 import "../../css/main.css";
 
 interface CreateActivityFormState {

@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import "@com.mgmtp.a12/plasma-design/dist/plasma.css";
 import "./App.css";
 
 const BASE_URL = "http://localhost:8080/get-increasing-number";

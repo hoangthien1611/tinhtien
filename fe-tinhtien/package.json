@@ -18,13 +18,18 @@
     "@types/recharts": "^1.1.5",
     "@types/react-router-dom": "^4.3.1",
     "react-scripts": "2.1.1",
-    "typescript": "3.2.2"
+    "typescript": "3.2.2",
+    "ncp": "^2.0.0",
+    "stylus": "^0.54.5",
+    "mkdirp": "^0.5.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "npm run copy-assets && npm run compile-stylus && react-scripts start",
+    "build": "npm run copy-assets && npm run compile-stylus && react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "copy-assets": "mkdirp src/design && ncp node_modules/@com.mgmtp.a12/plasma-design/assets/ src/design/assets/ -Force",
+    "compile-stylus": "mkdirp src/design/dist && stylus src/stylus/project.styl -o src/design/dist/project.css"
   },
   "eslintConfig": {
     "extends": "react-app"
