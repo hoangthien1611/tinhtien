@@ -11,7 +11,7 @@ import {
 
 import { addExpense, getExpenses } from "../../api/expenseApi";
 import commafy from "../../utils/amountFormatter";
-import AddExpenseDialog from "./AddExpenseDialog"
+import AddExpenseDialog from "./AddExpenseDialog";
 import Expense from "../../models/Expense";
 import Person from "../../models/Person";
 
@@ -29,7 +29,7 @@ export interface ExpenseScreenState {
 export default class ExpenseScreen extends React.Component<
   ExpenseScreenProps,
   ExpenseScreenState
-  > {
+> {
   state: ExpenseScreenState = {
     expenses: [],
     loading: false,
@@ -38,20 +38,22 @@ export default class ExpenseScreen extends React.Component<
 
   async componentDidMount(): Promise<void> {
     this.toggleLoading();
-    getExpenses(this.props.activityUrl,
+    getExpenses(
+      this.props.activityUrl,
       (expenses: Expense[]) => {
-        this.setState({ expenses })
+        this.setState({ expenses });
       },
       (errorMessage: string) => {
         console.log(errorMessage);
       },
       () => {
         this.toggleLoading();
-      })
+      }
+    );
   }
 
   onClickAddButton = (): void => {
-    this.setState({ addingExpense: true })
+    this.setState({ addingExpense: true });
   };
 
   toggleLoading = (): void => {
@@ -78,16 +80,15 @@ export default class ExpenseScreen extends React.Component<
             title="Add expense"
           />
         </div>
-        {this.state.addingExpense &&
+        {this.state.addingExpense && (
           <AddExpenseDialog
-            people={[
-              { id: 1, name: "tri" },
-              { id: 2, name: "vu" },
-            ]}
+            people={[{ id: 1, name: "tri" }, { id: 2, name: "vu" }]}
             onAddExpense={this.handleAddExpense}
-            onClose={() => { this.setState({ addingExpense: false }) }}
+            onClose={() => {
+              this.setState({ addingExpense: false });
+            }}
           />
-        }
+        )}
         {loading && <ProgressIndicator />}
       </>
     );
@@ -120,7 +121,11 @@ export default class ExpenseScreen extends React.Component<
     return result;
   };
 
-  private generateExpenseText(person: Person, expenseName: string, amount: number) {
+  private generateExpenseText(
+    person: Person,
+    expenseName: string,
+    amount: number
+  ) {
     return (
       <TextOutput>
         <span className="person-name">{person.name}</span> paid{" "}
@@ -130,19 +135,28 @@ export default class ExpenseScreen extends React.Component<
     );
   }
 
-  private handleAddExpense = (selectedPerson: number, description: string, amount: number, date: Date) => {
+  private handleAddExpense = (
+    selectedPerson: number,
+    description: string,
+    amount: number,
+    date: Date
+  ) => {
     this.toggleLoading();
-    addExpense(selectedPerson, description, amount, date,
+    addExpense(
+      selectedPerson,
+      description,
+      amount,
+      date,
       (expense: Expense) => {
         const expenses = this.state.expenses.concat(expense);
-        this.setState({ expenses })
+        this.setState({ expenses });
       },
       (errorMessage: string) => {
-        console.log(errorMessage)
+        console.log(errorMessage);
       },
       () => {
         this.toggleLoading();
       }
-    )
-  }
+    );
+  };
 }

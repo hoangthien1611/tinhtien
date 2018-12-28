@@ -15,13 +15,12 @@ public class ExpenseController {
     private ExpenseService expenseService;
 
     @PostMapping("")
-    public Object saveNewExpense(@RequestBody ExpenseDTO expenseDTO){
+    public Expense saveNewExpense(@RequestBody ExpenseDTO expenseDTO){
         return expenseService.saveNewExpense(expenseDTO);
     }
 
     @GetMapping("/{activityCode}")
     public List<Expense> getAll(@PathVariable String activityCode){
-        //activityCode is declared to be used later
-        return expenseService.getAllByOrderByCreatedDateAsc();
+        return expenseService.getAll(activityCode);
     }
 }
