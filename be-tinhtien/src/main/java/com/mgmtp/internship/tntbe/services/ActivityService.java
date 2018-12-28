@@ -4,7 +4,7 @@ import com.mgmtp.internship.tntbe.dto.ActivityDTO;
 import com.mgmtp.internship.tntbe.dto.ErrorMessage;
 import com.mgmtp.internship.tntbe.dto.PersonDTO;
 import com.mgmtp.internship.tntbe.entities.Activity;
-import com.mgmtp.internship.tntbe.entities.Expenses;
+import com.mgmtp.internship.tntbe.entities.Expense;
 import com.mgmtp.internship.tntbe.entities.Person;
 import com.mgmtp.internship.tntbe.repositories.ActivityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +69,7 @@ public class ActivityService {
                     double totalExpenseOfPerson = 0;
                     if(person.isActive()) {
                         if(person.getExpenses() != null && person.getExpenses().size() > 0) {
-                            for(Expenses expenses : person.getExpenses()) {
+                            for(Expense expenses : person.getExpenses()) {
                                 totalExpenseOfPerson += expenses.getAmount();
                             }
                         }

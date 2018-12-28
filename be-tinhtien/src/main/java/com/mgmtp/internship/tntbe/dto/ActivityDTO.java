@@ -18,7 +18,6 @@ public class ActivityDTO {
 
     private String url;
 
-    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private double totalExpense;
 
     private List<PersonDTO> persons;

@@ -37,5 +37,5 @@ public class Person {
 
     @OneToMany(mappedBy = "person")
     @JsonIgnore
-    private List<Expenses> expenses;
+    private List<Expense> expenses;
 }

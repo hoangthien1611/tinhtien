@@ -43,4 +43,4 @@ class Welcome extends Component<{}, {nameActivity: string}>{
     }
 
 }
-export default Welcome;
+export default Welcome; 

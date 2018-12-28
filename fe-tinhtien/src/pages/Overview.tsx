@@ -8,6 +8,7 @@ import {
 import { RouteComponentProps } from "react-router-dom";
 import { PeopleScreen } from "../components/PeopleScreen";
 import ExpenseScreen from "../components/expense/ExpenseScreen";
+import BalanceScreen from "../components/BalanceScreen";
 
 const menuItems = [
   { label: "People" },
@@ -65,23 +66,35 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
     }));
   }
 
+	private renderSwitch(activityName: string, activityUrl: string, activeMenu: string) {
+		switch (activeMenu) {
+      case "People":
+        return <PeopleScreen activityUrl={activityUrl} />
+      case "Balance":
+				return <BalanceScreen />
+			default:
+				return <ExpenseScreen title="Expenses" activityUrl={activityUrl} />
+		}
+	}
+
   render(): React.ReactNode {
-    const { activeMenu, activityUrl } = this.state;
+    const { activityName, activeMenu, activityUrl } = this.state;
 
     return (
-      <ApplicationFrame
-        main={
-          <div>
-            <ApplicationHeader leftSlots="TNT" />
-            <FlyoutMenu type="horizontal" items={this.getMenuItems()} />
-          </div>
-        }
-        content={
-          activeMenu === "People"
-            ? <PeopleScreen activityUrl={activityUrl} />
-            : (activeMenu === "Expenses" ? <ExpenseScreen title="Expenses" activityUrl={activityUrl} /> : activeMenu)
-        }
-      />
+      <div>
+        <ApplicationFrame
+          main={
+            <div>
+              <ApplicationHeader leftSlots="TNT" />
+              <FlyoutMenu type="horizontal" items={this.getMenuItems()} />
+            </div>
+          }
+          sub={undefined}
+          content={
+            this.renderSwitch(activityName, activityUrl, activeMenu)
+          }
+        />
+      </div>
     );
   }
 }
