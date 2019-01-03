@@ -2,6 +2,7 @@ import React from 'react';
 import { List, TextLineStateless, Icon, Button } from "@com.mgmtp.a12/widgets";
 import { Person } from "../models/person";
 import { PersonItem } from "./PersonItem";
+import { PersonItemInput } from "./PersonItemInput";
 import appConstant from '../utils/appConstant';
 
 const closeIcon = <Icon>close</Icon>;
@@ -9,6 +10,8 @@ const closeIcon = <Icon>close</Icon>;
 interface PeopleScreenState {
     persons: Person[];
     enteringName?: string;
+    editingPersonIndex?: number;
+    errorMessageEditInput?: string;
 }
 
 interface PeopleScreenProps {
@@ -22,6 +25,8 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
         this.state = {
             persons: [],
             enteringName: undefined,
+            editingPersonIndex: undefined,
+            errorMessageEditInput: undefined
         }
     }
 
@@ -44,7 +49,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     }
 
     render(): React.ReactNode {
-        let { persons, enteringName } = this.state;
+        let { persons, enteringName, editingPersonIndex, errorMessageEditInput } = this.state;
         enteringName = enteringName ? enteringName : "";
         return (
             <>
@@ -52,10 +57,20 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                     persons.length > 0
                         ? <List divider border>
                             {
-                                persons.map(p => {
+                                persons.map((person, index) => {
+                                    if (index === editingPersonIndex) {
+                                        return <PersonItemInput
+                                            person={person}
+                                            onCancelEdit={this.onCancelEdit}
+                                            onApplyEditResult={this.onApplyEditResult}
+                                            handleChangeEditInput={this.handleChangeEditInput}
+                                            errorMessage={errorMessageEditInput}
+                                            key={person.id}
+                                        />
+                                    }
                                     return <PersonItem
-                                        person={p}
-                                        key={p.id}
+                                        person={person}
+                                        key={person.id}
                                         onDelete={this.onDeletePerson}
                                         onEdit={this.onEditPerson}
                                     />
@@ -90,8 +105,55 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
         );
     };
 
+    onCancelEdit = (): void => {
+        this.setState({
+            editingPersonIndex: undefined,
+            errorMessageEditInput: undefined
+        })
+    }
+
+    onApplyEditResult = async (person: Person, newName: string): Promise<void> => {
+        try {
+            const { persons } = this.state;
+            const personsEdited = persons.map(p => {
+                if (p.name === person.name) {
+                    p.name = newName
+                }
+                return p;
+            })
+            this.setState({
+                editingPersonIndex: undefined,
+                errorMessageEditInput: undefined,
+                persons: personsEdited
+
+            })
+            await fetch('api/person', {
+                method: "PUT",
+                body: JSON.stringify({ name: this.trimName((newName).trim()), id: person.id }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+        } catch (error) {
+            console.log(error);
+        }
+
+    }
+
+    private handleChangeEditInput = (value?: string): void => {
+        this.setState({
+            errorMessageEditInput: this.validateInput(value)
+        })
+    }
+
     onEditPerson = async (person: Person): Promise<void> => {
-        alert('edit ' + person.name);
+        const { persons } = this.state;
+        persons.forEach((p, index) => {
+            if (p.name === person.name)
+                this.setState({
+                    editingPersonIndex: index
+                })
+        })
     };
 
     onDeletePerson = async (person: Person): Promise<void> => {
@@ -149,6 +211,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
             }
         }
     }
+
     private trimName(name: string): string {
         return name.trim().split(' ')
             .filter(word => { return word.trim().length > 0 })
