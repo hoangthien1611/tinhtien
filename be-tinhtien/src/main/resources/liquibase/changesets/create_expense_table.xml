@@ -24,5 +24,7 @@
             </column>
         </createTable>
     </changeSet>
-
+    <changeSet id="update_expense_table" author="vdhphan">
+        <modifyDataType tableName="expenses" columnName="amount" newDataType="double" />
+    </changeSet>
 </databaseChangeLog>
