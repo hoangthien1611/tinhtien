@@ -28,7 +28,7 @@ public class ExpenseService {
         if (expenseDTO.getName().trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item name is empty!");
         } else if (expenseDTO.getPersonId() == 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "DummyPerson is empty!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Person is empty!");
         } else if (expenseDTO.getName().length() > 255) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Item name is too long, it must contain less than 255 characters!");

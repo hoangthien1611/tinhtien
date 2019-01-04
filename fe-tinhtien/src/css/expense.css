@@ -17,24 +17,10 @@
 }
 .btn-add-expense {
   position: absolute;
-  right: 20px;
-  bottom: 20px;
+  right: 40px;
+  margin-top: 10px;
 }
 .wrapper {
   max-width: 800px;
   margin: auto;
-}
-
-#list-expense{
-  overflow:scroll;
-  height: calc(100% - 180px);
-  width: 95%;
-  position: absolute;
-}
-
-@media only screen and (max-width: 600px) {
-  #list-expense{
-    height: calc(100% - 60px);
-    width: 100%;
-  }
 }

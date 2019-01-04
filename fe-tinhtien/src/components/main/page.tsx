@@ -20,13 +20,13 @@ export default class MainPage extends React.Component<{}, MainPageState> {
     return this.state.showForm ? (
       <CreateActivityForm />
     ) : (
-      <div className="padding-top-10">
-        <Button
-          className="center"
-          label="Create new activity"
-          onClick={this.showForm}
-        />
-      </div>
-    );
+        <div className="padding-top-10">
+          <Button
+            className="center"
+            label="Create new activity"
+            onClick={this.showForm}
+          />
+        </div>
+      );
   }
 }

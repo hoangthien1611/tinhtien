@@ -30,7 +30,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "copy-assets": "mkdirp src/design && ncp node_modules/@com.mgmtp.a12/plasma-design/assets/ src/design/assets/ -Force",
-    "compile-stylus": "mkdirp src/design/dist && stylus src/stylus/project.styl -o src/design/dist/project.css"
+    "compile-stylus": "mkdirp src/design/dist && stylus src/stylus/project.styl -o src/design/dist/project.css",
+    "compile-watch-stylus": "mkdirp src/design/dist && stylus -w src/stylus/project.styl -o src/design/dist/project.css"
   },
   "eslintConfig": {
     "extends": "react-app"

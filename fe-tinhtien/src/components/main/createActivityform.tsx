@@ -13,12 +13,12 @@ interface CreateActivityFormState {
   validateResult: string;
 }
 
-interface CreateActivityFormProps extends RouteComponentProps<any> {}
+interface CreateActivityFormProps extends RouteComponentProps<any> { }
 
 class CreateActivityForm extends React.Component<
   CreateActivityFormProps,
   CreateActivityFormState
-> {
+  > {
   state: CreateActivityFormState = {
     formValue: "",
     validateResult: ValidActivityResult.EmptyError

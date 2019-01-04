@@ -1,8 +1,9 @@
 import Person from "./Person";
 
 export default interface Expense {
-  id:number;
+  id: number;
   person: Person;
   name: string;
   amount: number;
+  date: Date;
 }

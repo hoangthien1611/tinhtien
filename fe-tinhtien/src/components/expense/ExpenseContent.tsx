@@ -14,6 +14,8 @@ import commafy from "../../utils/amountFormatter";
 import AddExpenseDialog from "./AddExpenseDialog";
 import Expense from "../../models/Expense";
 import Person from "../../models/Person";
+import { getPersons } from "../../api/personApi";
+import { compareDateInYearMonthDay } from "../../utils/dateHelper";
 
 export interface ExpenseScreenProps {
   title: string;
@@ -29,7 +31,7 @@ export interface ExpenseScreenState {
 export default class ExpenseScreen extends React.Component<
   ExpenseScreenProps,
   ExpenseScreenState
-> {
+  > {
   state: ExpenseScreenState = {
     expenses: [],
     loading: false,
@@ -68,7 +70,8 @@ export default class ExpenseScreen extends React.Component<
     return (
       <>
         <div>
-          <List id="list-expense" divider border>
+          <List id="list-expense" divider border
+            style={expenses.length === 0 ? { visibility: "hidden" } : { visibility: "visible" }}>
             {this.renderExpenses(expenses)}
           </List>
           <Button
@@ -129,7 +132,7 @@ export default class ExpenseScreen extends React.Component<
     return (
       <TextOutput>
         <span className="person-name">{person.name}</span> paid{" "}
-        <span className="amount-expense">{commafy(amount)} ₫</span> for{" "}
+        <span className="amount-expense">{commafy(amount)}</span> for{" "}
         <span className="expense-name">{expenseName}</span>.
       </TextOutput>
     );
@@ -143,13 +146,10 @@ export default class ExpenseScreen extends React.Component<
   ) => {
     this.toggleLoading();
     addExpense(
-      selectedPerson,
-      description,
-      amount,
-      date,
+      selectedPerson, description, amount, date,
       (expense: Expense) => {
-        const expenses = this.state.expenses.concat(expense);
-        this.setState({ expenses });
+        const newExpenses = this.addExpenseInOrder(this.state.expenses, expense)
+        this.setState({ expenses: newExpenses });
       },
       (errorMessage: string) => {
         console.log(errorMessage);
@@ -159,4 +159,17 @@ export default class ExpenseScreen extends React.Component<
       }
     );
   };
+
+  private addExpenseInOrder(originExpenses: Expense[], addExpense: Expense) {
+    const newExpenses = originExpenses.slice()
+    let i = newExpenses.length - 1;
+    while (i >= 0) {
+      if (compareDateInYearMonthDay(newExpenses[i].date, addExpense.date) <= 0) {
+        break;
+      }
+      i--;
+    }
+    newExpenses.splice(i + 1, 0, addExpense);
+    return newExpenses;
+  }
 }

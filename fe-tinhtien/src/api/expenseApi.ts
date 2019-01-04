@@ -53,6 +53,7 @@ function parserTo(jsonObject: any): Expense {
     id: jsonObject.id,
     name: jsonObject.name,
     person: person,
-    amount: jsonObject.amount
+    amount: jsonObject.amount,
+    date: jsonObject.createdDate
   };
 }

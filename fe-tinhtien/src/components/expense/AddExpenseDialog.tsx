@@ -34,7 +34,7 @@ interface AddExpenseDialogProps {
 export default class AddExpenseDialog extends React.Component<
   AddExpenseDialogProps,
   AddExpenseDialogState
-> {
+  > {
   private validateDescriptionResult: ValidateResult;
   private validateAmountResult: ValidateResult;
 
@@ -53,8 +53,8 @@ export default class AddExpenseDialog extends React.Component<
   private addExpense = () => {
     this.props.onAddExpense(
       this.state.selectedPersonId,
-      this.state.description,
-      Number(this.state.amount),
+      this.state.description.trim(),
+      Number(this.state.amount.trim()),
       this.state.date
     );
     this.props.onClose();
@@ -70,7 +70,9 @@ export default class AddExpenseDialog extends React.Component<
 
   private validateDescription(description: string): ValidateResult {
     if (description.length === 0) return ValidateResult.EmptyError;
-    if (description.trim().length === 0) return ValidateResult.WhiteSpaceError;
+    const actualLength = description.trim().length
+    if (actualLength === 0) return ValidateResult.WhiteSpaceError;
+    if (actualLength > 255) return ValidateResult.LongerThan255Error;
     return ValidateResult.Ok;
   }
 
@@ -82,7 +84,9 @@ export default class AddExpenseDialog extends React.Component<
 
   private validateAmount(amount: string): ValidateResult {
     if (amount.length === 0) return ValidateResult.EmptyError;
-    let amountNumber = Number(amount);
+    amount = amount.trim()
+    if (amount.length === 0) return ValidateResult.WhiteSpaceError;
+    const amountNumber = Number(amount);
     if (isNaN(amountNumber) || !amount.match(/^-?\d*(\.\d*)?$/))
       return ValidateResult.NotNumberError;
     if (amountNumber <= 0) return ValidateResult.ZeroOrNegativeError;
