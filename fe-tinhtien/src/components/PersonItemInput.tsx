@@ -34,6 +34,7 @@ export class PersonItemInput extends React.Component<PersonItemInputProps, Perso
                     <div className="field__messageText"></div>
                 </div>
                 <TextLineStateless
+                    autoFocus={true}
                     value={this.state.enteringName}
                     onChange={event => this.handleChangeEditInput(event.target.value)}
                     onKeyDown={event => this.handleKeyDown(event.key)}

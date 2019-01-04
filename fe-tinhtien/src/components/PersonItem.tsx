@@ -30,13 +30,13 @@ export class PersonItem extends React.Component<PersonItemProps, PersonItemState
                         <Button
                             title="Edit"
                             style={{ margin: '0 10px' }}
-                            iconButton icon={editIcon}
+                            iconButton secondary icon={editIcon}
                             onClick={this.onEditButtonClick}
                         />
                         <Button
                             title="Delete"
                             style={{ margin: '0 10px' }}
-                            iconButton destructive icon={deleteIcon}
+                            iconButton secondary destructive icon={deleteIcon}
                             onClick={this.onDeleteButtonClick}
                         />
                     </>

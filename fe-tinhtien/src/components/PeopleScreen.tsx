@@ -4,6 +4,7 @@ import { Person } from "../models/person";
 import { PersonItem } from "./PersonItem";
 import { PersonItemInput } from "./PersonItemInput";
 import appConstant from '../utils/appConstant';
+import scrollIntoView from 'scroll-into-view-if-needed'
 
 const closeIcon = <Icon>close</Icon>;
 
@@ -86,14 +87,13 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                             <div className="field__messageText"></div>
                         </div>
                         <TextLineStateless
-                            autoFocus={true}
                             value={enteringName}
                             onChange={event => this.handleChange(event.target.value)}
                             placeholder={appConstant.placeholder.ENTER_NAME}
                             onKeyDown={event => this.handleKeyDown(event.key)}
                             errorMessage={enteringName.length !== 0 ? this.validateInput(enteringName) : ""}
                             rightButton={
-                                <Button title='Clear' icon={closeIcon} onClick={this.onClearButtonClick} />
+                                <Button title='Clear' style={{ width: "100%" }} icon={closeIcon} onClick={this.onClearButtonClick} />
                             }
                             inputRef={instance => this.inputRef = instance}
                         />
@@ -151,7 +151,8 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
         persons.forEach((p, index) => {
             if (p.name === person.name)
                 this.setState({
-                    editingPersonIndex: index
+                    editingPersonIndex: index,
+                    errorMessageEditInput: undefined
                 })
         })
     };
@@ -204,7 +205,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                 });
                 if (this.inputRef) {
                     this.inputRef.focus();
-                    this.inputRef.scrollIntoView(true);
+                    scrollIntoView(this.inputRef, { behavior: 'smooth', scrollMode: 'if-needed' })
                 }
             } catch (error) {
                 console.log(error);
