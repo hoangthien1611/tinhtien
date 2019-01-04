@@ -63,7 +63,6 @@ public class ActivityService {
         Activity activity = activityRepository.findByUrl(url);
         if (activity != null) {
             List<PersonDTO> persons = new ArrayList<>();
-            double totalExpenseOfActivity = 0;
             if(activity.getPersons() != null && activity.getPersons().size() > 0) {
                 for (Person person : activity.getPersons()) {
                     double totalExpenseOfPerson = 0;
@@ -75,10 +74,9 @@ public class ActivityService {
                         }
                     }
                     persons.add(new PersonDTO(person.getId(), person.getName(), person.isActive(), totalExpenseOfPerson));
-                    totalExpenseOfActivity += totalExpenseOfPerson;
                 }
             }
-            return new ActivityDTO(activity.getName(), activity.getUrl(), totalExpenseOfActivity, persons);
+            return new ActivityDTO(activity.getName(), activity.getUrl(), persons);
         } else return null;
     }
 
