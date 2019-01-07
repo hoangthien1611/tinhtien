@@ -10,6 +10,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExpenseDTO {
+    private long id;
     private long personId;
     private String name;
     private double amount;

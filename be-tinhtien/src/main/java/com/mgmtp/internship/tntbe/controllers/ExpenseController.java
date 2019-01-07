@@ -15,12 +15,17 @@ public class ExpenseController {
     private ExpenseService expenseService;
 
     @PostMapping("")
-    public Expense saveNewExpense(@RequestBody ExpenseDTO expenseDTO){
+    public Expense saveNewExpense(@RequestBody ExpenseDTO expenseDTO) {
         return expenseService.saveNewExpense(expenseDTO);
     }
 
     @GetMapping("/{activityCode}")
-    public List<Expense> getAll(@PathVariable String activityCode){
+    public List<Expense> getAll(@PathVariable String activityCode) {
         return expenseService.getAll(activityCode);
+    }
+
+    @PutMapping
+    public Expense updateExpense(@RequestBody ExpenseDTO expenseDTO) {
+        return expenseService.updateExpense(expenseDTO);
     }
 }

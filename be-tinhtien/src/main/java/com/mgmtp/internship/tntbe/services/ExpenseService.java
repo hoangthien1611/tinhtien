@@ -56,4 +56,49 @@ public class ExpenseService {
         List<Person> people = activity.getPersons();
         return expenseRepository.findAllByPersonInOrderByCreatedDateAsc(people);
     }
+
+    public Expense updateExpense(ExpenseDTO expenseDTO) {
+        validateExpenseData(expenseDTO);
+
+        Expense expenseNeedChange = expenseRepository
+                .findById(expenseDTO.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Expense is not found!"));
+
+        Person newPerson = personRepository
+                .findById(expenseDTO.getPersonId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Person is not found!"));
+
+        if (expenseNeedChange.getPerson().getActivity().getId() != newPerson.getActivity().getId()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The person is not belongs to this activity!");
+        }
+
+        expenseNeedChange.setPerson(newPerson);
+        expenseNeedChange.setName(StringUtils.normalizeSpace(expenseDTO.getName()));
+        expenseNeedChange.setAmount(expenseDTO.getAmount());
+        expenseNeedChange.setCreatedDate(expenseDTO.getCreatedDate());
+
+        return expenseRepository.save(expenseNeedChange);
+    }
+
+    private void validateExpenseData(ExpenseDTO expenseDTO) {
+        if (expenseDTO == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Expense must not be null!");
+        }
+
+        if (StringUtils.isBlank(expenseDTO.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Expense's name must not be white-space only!");
+        }
+
+        if (expenseDTO.getName().length() > 255) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Expense's name must not be greater than 255 characters!");
+        }
+
+        if (expenseDTO.getAmount() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The amount must be greater than 0!");
+        }
+
+        if (expenseDTO.getCreatedDate() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The created date must not be null!");
+        }
+    }
 }
