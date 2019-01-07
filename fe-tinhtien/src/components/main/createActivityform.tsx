@@ -15,14 +15,14 @@ interface CreateActivityFormState {
 
 interface CreateActivityFormProps extends RouteComponentProps<any> { }
 
-class CreateActivityForm extends React.Component<
-  CreateActivityFormProps,
-  CreateActivityFormState
-  > {
-  state: CreateActivityFormState = {
-    formValue: "",
-    validateResult: ValidActivityResult.EmptyError
-  };
+class CreateActivityForm extends React.Component<CreateActivityFormProps, CreateActivityFormState> {
+  constructor(props: CreateActivityFormProps) {
+    super(props);
+    this.state = {
+      formValue: "",
+      validateResult: ValidActivityResult.EmptyError
+    }
+  }
 
   private handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let inputValue = event.target.value;
@@ -40,6 +40,12 @@ class CreateActivityForm extends React.Component<
     });
   };
 
+  handleKeyDown(key: string): void {
+    if (key === "Enter") {
+      this.handleCreateActivity();
+    }
+  }
+
   private routeToWelcome(url: String) {
     this.props.history.push("/activity/" + url);
   }
@@ -51,6 +57,7 @@ class CreateActivityForm extends React.Component<
           <TextLineStateless
             value={this.state.formValue}
             onChange={this.handleInputChange}
+            onKeyDown={event => this.handleKeyDown(event.key)}
             placeholder="Your activity's name"
             autoFocus
           />
