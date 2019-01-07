@@ -1,6 +1,6 @@
 import React from 'react';
 import { List, Icon, Button } from "@com.mgmtp.a12/widgets";
-import { Person } from '../models/person';
+import Person from '../models/Person';
 const personIcon = <Icon>person</Icon>;
 const deleteIcon = <Icon>delete</Icon>;
 const editIcon = <Icon>edit</Icon>;

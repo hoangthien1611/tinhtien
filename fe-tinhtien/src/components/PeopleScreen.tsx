@@ -1,6 +1,6 @@
 import React from 'react';
 import { List, TextLineStateless, Icon, Button } from "@com.mgmtp.a12/widgets";
-import { Person } from "../models/person";
+import Person from "../models/Person";
 import { PersonItem } from "./PersonItem";
 import { PersonItemInput } from "./PersonItemInput";
 import appConstant from '../utils/appConstant';

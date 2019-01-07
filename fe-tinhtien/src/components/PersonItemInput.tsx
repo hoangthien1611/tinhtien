@@ -1,6 +1,6 @@
 import React from 'react';
 import { Icon, Button, TextLineStateless } from "@com.mgmtp.a12/widgets";
-import { Person } from '../models/person';
+import Person from '../models/Person';
 import appConstant from '../utils/appConstant'
 const editIcon = <Icon>edit</Icon>;
 const editButton = <Button iconButton icon={editIcon} disabled />;

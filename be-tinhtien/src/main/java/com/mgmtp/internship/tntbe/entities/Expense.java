@@ -16,7 +16,7 @@ public class Expense {
     public Expense() {
     }
 
-    public Expense(DummyPerson person, String name, double amount, Date createdDate) {
+    public Expense(Person person, String name, double amount, Date createdDate) {
         this.person = person;
         this.name = name;
         this.amount = amount;
@@ -25,7 +25,7 @@ public class Expense {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "person_id", nullable = false)
-    private DummyPerson person;
+    private Person person;
 
     @Column(name = "name", unique = true)
     private String name;

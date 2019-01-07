@@ -2,12 +2,11 @@ package com.mgmtp.internship.tntbe.services;
 
 import com.mgmtp.internship.tntbe.dto.ExpenseDTO;
 import com.mgmtp.internship.tntbe.entities.Activity;
-import com.mgmtp.internship.tntbe.entities.DummyPerson;
 import com.mgmtp.internship.tntbe.entities.Expense;
 import com.mgmtp.internship.tntbe.entities.Person;
 import com.mgmtp.internship.tntbe.repositories.ActivityRepository;
-import com.mgmtp.internship.tntbe.repositories.DummyPersonRepository;
 import com.mgmtp.internship.tntbe.repositories.ExpenseRepository;
+import com.mgmtp.internship.tntbe.repositories.PersonRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,15 +14,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ExpenseService {
     @Autowired
     private ExpenseRepository expenseRepository;
     @Autowired
-    private DummyPersonRepository dummyPersonRepository;
+    private PersonRepository personRepository;
     @Autowired
     private ActivityRepository activityRepository;
+
     public Expense saveNewExpense(ExpenseDTO expenseDTO) {
         if (expenseDTO.getName().trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item name is empty!");
@@ -37,15 +38,19 @@ public class ExpenseService {
         } else {
             // remove extra white space in Item name
             expenseDTO.setName(StringUtils.normalizeSpace(expenseDTO.getName()));
-            DummyPerson dummyPerson = dummyPersonRepository.findAllById(expenseDTO.getPersonId());
-            return expenseRepository.save(new Expense(dummyPerson, expenseDTO.getName(), expenseDTO.getAmount(), expenseDTO.getCreatedDate()));
+            Optional<Person> optionalPerson = personRepository.findById(expenseDTO.getPersonId());
+            if (optionalPerson.isPresent()) {
+                return expenseRepository.save(
+                        new Expense(optionalPerson.get(), expenseDTO.getName(), expenseDTO.getAmount(), expenseDTO.getCreatedDate()));
+            }
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There's no person with this id");
         }
     }
 
-    public List<Expense> getAll(String activityCode){
+    public List<Expense> getAll(String activityCode) {
         Activity activity = activityRepository.findByUrl(activityCode);
-        if(activity == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Activity not found!");
+        if (activity == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There's no activity with this code!");
         }
 
         List<Person> people = activity.getPersons();
