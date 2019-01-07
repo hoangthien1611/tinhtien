@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Label, List } from "@com.mgmtp.a12/widgets";
-import Person from "../model/person";
+import Person from "../models/Person";
 import Money from "./money";
 
 export interface BalanceState {
@@ -9,8 +9,10 @@ export interface BalanceState {
 	persons: Person[];
 }
 
-export function formatToCurrency(num: number) {
-	return num.toFixed(2).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+export function formatToCurrency(num?: number) {
+		return num!== undefined 
+			? num.toFixed(2).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+			: "0.00";
 }
 
 export default class BalanceScreen extends React.Component<{}, BalanceState> {
@@ -32,10 +34,11 @@ export default class BalanceScreen extends React.Component<{}, BalanceState> {
 	  try {
 			const url: string = "api/activity" + hashCode + "/persons";
 			const result = await fetch(url);
-			const balanceJSON = await result.json();
-      if (balanceJSON.persons.length == 0) return;
-      const totalExpense: number = await balanceJSON["totalExpense"];
-      const persons: Person[] = await balanceJSON["persons"];
+			const personJSON = await result.json();
+			console.log(personJSON);
+      if (personJSON.persons.length == 0) return;
+      const totalExpense: number = await personJSON["totalExpense"];
+      const persons: Person[] = await personJSON["persons"];
 			this.setState({
 				totalExpense: totalExpense,
         persons: persons,
@@ -83,7 +86,11 @@ export default class BalanceScreen extends React.Component<{}, BalanceState> {
 										</div>
 									}
 									meta={
-										<Money amount={person.totalExpense - this.state.averageExpense} />
+										<Money amount={
+											person.totalExpense !== undefined 
+												? person.totalExpense - this.state.averageExpense
+												: 0.00
+										} />
 									}
 								/>
 							);

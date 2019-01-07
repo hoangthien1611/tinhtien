@@ -1,0 +1,16 @@
+/* .list-item__graphic {
+  width: 85px;
+} */
+.paidPerson-name,
+.receivePerson-name {
+  font-weight: bold;
+}
+.paidPerson-name {
+  color: rgb(224, 26, 52);
+}
+.receivePerson-name {
+  color: rgb(29, 151, 45);
+}
+.amount {
+    color: cornflowerblue
+}

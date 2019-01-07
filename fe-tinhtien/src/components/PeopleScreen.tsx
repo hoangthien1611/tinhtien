@@ -9,14 +9,14 @@ import scrollIntoView from 'scroll-into-view-if-needed'
 const closeIcon = <Icon>close</Icon>;
 
 interface PeopleScreenState {
-    persons: Person[];
-    enteringName?: string;
-    editingPersonIndex?: number;
-    errorMessageEditInput?: string;
+	persons: Person[];
+	enteringName?: string;
+	editingPersonIndex?: number;
+	errorMessageEditInput?: string;
 }
 
 interface PeopleScreenProps {
-    activityUrl: string
+	activityUrl: string
 }
 
 export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScreenState> {

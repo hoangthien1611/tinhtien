@@ -9,11 +9,15 @@ import { RouteComponentProps } from "react-router-dom";
 import { PeopleScreen } from "../components/PeopleScreen";
 import ExpenseScreen from "../components/expense/ExpenseScreen";
 import BalanceScreen from "../components/BalanceScreen";
+import { OutstandingPayment } from "../models/OutStandingPayment";
+import * as data from "../dummyData/data.json"
+import { OutstandingPayMentScreen } from "../components/outstandingpayment/OutStandingPaymentScreen";
 
 const menuItems = [
   { label: "People" },
   { label: "Expenses" },
-  { label: "Balance" }
+  { label: "Balance" },
+  { label: "Outstanding"}
 ];
 
 interface OverviewState {
@@ -72,10 +76,16 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
         return <PeopleScreen activityUrl={activityUrl} />
       case "Balance":
 				return <BalanceScreen />
+      case "Outstanding":
+        return <OutstandingPayMentScreen outstandingPayments={this.getSample()}/>
 			default:
 				return <ExpenseScreen title="Expenses" activityUrl={activityUrl} />
 		}
-	}
+  }
+  
+  getSample(): OutstandingPayment[]{
+    return data.outstanding;
+  }
 
   render(): React.ReactNode {
     const { activityName, activeMenu, activityUrl } = this.state;
