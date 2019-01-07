@@ -1,17 +1,17 @@
-import { addData, getData } from "../utils/apiCaller"
+import { addData, getData, updateData } from "../utils/apiCaller"
 import Expense from "../models/Expense"
 
-const baseUrl = "/api/expense";
+const baseUrl = "api/expense/";
 
-export const addExpense = (selectedPerson: number, description: string, amount: number, date: Date,
+export const addExpense = (name: string, amount: number, personId: number, createdDate: Date,
   onSuccess: (expenses: Expense) => void,
   onFailure: (errorMessage: string) => void,
   onFinal?: () => void) => {
   addData(baseUrl, {
-    "personId": selectedPerson,
-    "name": description,
+    "personId": personId,
+    "name": name,
     "amount": amount,
-    "createdDate": date
+    "createdDate": createdDate
   }).then(jsonResult => {
     if (jsonResult.error) {
       onFailure(jsonResult.message);
@@ -28,7 +28,7 @@ export const getExpenses = (activityUrl: string,
   onSuccess: (expenses: Expense[]) => void,
   onFailure: (errorMessage: string) => void,
   onFinal?: () => void) => {
-  getData(baseUrl + "/" + activityUrl).then(
+  getData(baseUrl + activityUrl).then(
     jsonResult => {
       if (jsonResult.error) {
         onFailure(jsonResult.message);
@@ -40,6 +40,30 @@ export const getExpenses = (activityUrl: string,
         onSuccess(expenses);
       }
 
+      if (onFinal) {
+        onFinal();
+      }
+    }
+  )
+}
+
+export const editExpense = (id: number, name: string, amount: number, personId: number, createdDate: Date,
+  onSuccess: (expenses: Expense) => void,
+  onFailure: (errorMessage: string) => void,
+  onFinal?: () => void) => {
+  updateData(baseUrl, {
+    "id": id,
+    "name": name,
+    "personId": personId,
+    "amount": amount,
+    "createdDate": createdDate
+  }).then(
+    jsonResult => {
+      if (jsonResult.error) {
+        onFailure(jsonResult.message);
+      } else {
+        onSuccess(parserTo(jsonResult));
+      }
       if (onFinal) {
         onFinal();
       }

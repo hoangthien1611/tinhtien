@@ -5,17 +5,16 @@ import {
   List,
   Icon,
   Button,
-  TextOutput,
   ProgressIndicator
 } from "@com.mgmtp.a12/widgets";
 
-import { addExpense, getExpenses } from "../../api/expenseApi";
-import commafy from "../../utils/amountFormatter";
-import AddExpenseDialog from "./AddExpenseDialog";
+import { addExpense, getExpenses, editExpense } from "../../api/expenseApi";
 import Expense from "../../models/Expense";
 import Person from "../../models/Person";
 import { getPersons } from "../../api/personApi";
 import { compareDateInYearMonthDay } from "../../utils/dateHelper";
+import { ExpenseItem } from "./ExpenseItem";
+import ExpenseDialog from "./ExpenseDialog";
 
 export interface ExpenseScreenProps {
   title: string;
@@ -24,18 +23,23 @@ export interface ExpenseScreenProps {
 
 export interface ExpenseScreenState {
   expenses: Expense[];
+  persons: Person[];
   loading: boolean;
   addingExpense: boolean;
-  persons: Person[];
+  editingExpense: boolean;
+  deletingExpense: boolean;
+  focusExpense?: Expense;
   addable: boolean
 }
 
 export default class ExpenseScreen extends React.Component<ExpenseScreenProps, ExpenseScreenState> {
   state: ExpenseScreenState = {
     expenses: [],
+    persons: [],
     loading: false,
     addingExpense: false,
-    persons: [],
+    editingExpense: false,
+    deletingExpense: false,
     addable: false
   };
 
@@ -62,19 +66,10 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
       })
   }
 
-  onClickAddButton = (): void => {
-    this.setState({ addingExpense: true });
-  };
 
-  toggleLoading = (): void => {
-    this.setState({
-      loading: !this.state.loading
-    });
-  };
 
   render() {
-    const { expenses, loading, addable, persons, addingExpense } = this.state;
-
+    const { expenses, loading, addable, persons, addingExpense, editingExpense, focusExpense } = this.state;
     return (
       <>
         <div>
@@ -93,12 +88,22 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
           />
         </div>
         {addingExpense && (
-          <AddExpenseDialog
+          <ExpenseDialog
             people={persons}
-            onAddExpense={this.handleAddExpense}
+            onSubmit={this.handleAddExpense}
             onClose={() => {
               this.setState({ addingExpense: false });
             }}
+          />
+        )}
+        {editingExpense && focusExpense && (
+          <ExpenseDialog
+            people={persons}
+            onSubmit={this.handleEditExpense}
+            onClose={() => {
+              this.setState({ editingExpense: false, focusExpense: undefined });
+            }}
+            expense={focusExpense}
           />
         )}
         {loading && <ProgressIndicator />}
@@ -107,57 +112,42 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
   }
 
   private renderExpenses = (expenses: any[]): React.ReactNode => {
-    let result: any[] = [];
-
-    result = expenses.map((item, index) => {
+    return expenses.map(item => {
       return (
-        <List.Item
-          text={this.generateExpenseText(item.person, item.name, item.amount)}
-          key={index}
-          graphic={<Icon>reply</Icon>}
-          meta={
-            <>
-              <Button iconButton icon={<Icon>edit</Icon>} title="Edit" />
-              <Button
-                iconButton
-                destructive
-                icon={<Icon>delete</Icon>}
-                title="Delete"
-              />
-            </>
-          }
-        />
+        <ExpenseItem expense={item} onDelete={this.onClickDeleteButton} onEdit={this.onClickEditButton} key={item.id} />
       );
     });
-
-    return result;
   };
 
-  private generateExpenseText(
-    person: Person,
-    expenseName: string,
-    amount: number
-  ) {
-    return (
-      <TextOutput>
-        <span className="person-name">{person.name}</span> paid{" "}
-        <span className="amount-expense">{commafy(amount)}</span> for{" "}
-        <span className="expense-name">{expenseName}</span>.
-      </TextOutput>
-    );
+  private onClickAddButton = () => {
+    this.setState({ addingExpense: true });
+  };
+
+  private onClickEditButton = (focusExpense?: Expense) => {
+    this.setState({ editingExpense: true, focusExpense });
   }
 
+  private onClickDeleteButton = (focusExpense: Expense) => {
+    this.setState({ deletingExpense: true, focusExpense })
+  }
+
+  private toggleLoading = (): void => {
+    this.setState({
+      loading: !this.state.loading
+    });
+  };
+
   private handleAddExpense = (
-    selectedPerson: number,
-    description: string,
+    name: string,
     amount: number,
-    date: Date
+    personId: number,
+    createdDate: Date,
   ) => {
     this.toggleLoading();
     addExpense(
-      selectedPerson, description, amount, date,
+      name, amount, personId, createdDate,
       (expense: Expense) => {
-        const newExpenses = this.addExpenseInOrder(this.state.expenses, expense)
+        const newExpenses = this.addExpenseInLocal(this.state.expenses, expense)
         this.setState({ expenses: newExpenses });
       },
       (errorMessage: string) => {
@@ -169,7 +159,30 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
     );
   };
 
-  private addExpenseInOrder(originExpenses: Expense[], addExpense: Expense) {
+  private handleEditExpense = (name: string, amount: number, personId: number, createdDate: Date, id?: number) => {
+    if (!id) return;
+    this.toggleLoading();
+    editExpense(
+      id, name, amount, personId, createdDate,
+      (expense: Expense) => {
+        const newExpenses = this.editExpenseInLocal(this.state.expenses, expense)
+        if (newExpenses) { this.setState({ expenses: newExpenses }); }
+        console.log(expense);
+      },
+      (errorMessage: string) => {
+        console.log(errorMessage);
+      },
+      () => {
+        this.toggleLoading();
+      }
+    );
+  }
+
+  private handleDeleteExpense = (expenseId: number) => {
+
+  }
+
+  private addExpenseInLocal(originExpenses: Expense[], addExpense: Expense) {
     const newExpenses = originExpenses.slice()
     let i = newExpenses.length - 1;
     while (i >= 0) {
@@ -180,5 +193,14 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
     }
     newExpenses.splice(i + 1, 0, addExpense);
     return newExpenses;
+  }
+
+  private editExpenseInLocal(originExpenses: Expense[], editExpense: Expense) {
+    for (let i = 0; i < originExpenses.length; i++) {
+      if (originExpenses[i].id === editExpense.id) {
+        originExpenses.splice(i, 1)
+        return this.addExpenseInLocal(originExpenses, editExpense)
+      }
+    }
   }
 }
