@@ -48,7 +48,7 @@ export const getExpenses = (activityUrl: string,
 }
 
 function parserTo(jsonObject: any): Expense {
-  const person = { id: jsonObject.person.id, name: jsonObject.person.name }
+  const person = { id: jsonObject.person.id, name: jsonObject.person.name, active: jsonObject.person.active }
   return {
     id: jsonObject.id,
     name: jsonObject.name,

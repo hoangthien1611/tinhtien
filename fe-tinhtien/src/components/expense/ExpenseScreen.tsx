@@ -26,16 +26,17 @@ export interface ExpenseScreenState {
   expenses: Expense[];
   loading: boolean;
   addingExpense: boolean;
+  persons: Person[];
+  addable: boolean
 }
 
-export default class ExpenseScreen extends React.Component<
-  ExpenseScreenProps,
-  ExpenseScreenState
-  > {
+export default class ExpenseScreen extends React.Component<ExpenseScreenProps, ExpenseScreenState> {
   state: ExpenseScreenState = {
     expenses: [],
     loading: false,
-    addingExpense: false
+    addingExpense: false,
+    persons: [],
+    addable: false
   };
 
   async componentDidMount(): Promise<void> {
@@ -52,6 +53,13 @@ export default class ExpenseScreen extends React.Component<
         this.toggleLoading();
       }
     );
+
+    getPersons(this.props.activityUrl, (persons: Person[]) => {
+      this.setState({ persons, addable: persons.length > 0 });
+    },
+      (errorMessage: string) => {
+        console.log(errorMessage);
+      })
   }
 
   onClickAddButton = (): void => {
@@ -65,7 +73,7 @@ export default class ExpenseScreen extends React.Component<
   };
 
   render() {
-    const { expenses, loading } = this.state;
+    const { expenses, loading, addable, persons, addingExpense } = this.state;
 
     return (
       <>
@@ -75,6 +83,7 @@ export default class ExpenseScreen extends React.Component<
             {this.renderExpenses(expenses)}
           </List>
           <Button
+            disabled={!addable}
             className="btn-add-expense"
             onClick={this.onClickAddButton}
             iconButton
@@ -83,9 +92,9 @@ export default class ExpenseScreen extends React.Component<
             title="Add expense"
           />
         </div>
-        {this.state.addingExpense && (
+        {addingExpense && (
           <AddExpenseDialog
-            people={[{ id: 1, name: "tri" }, { id: 2, name: "vu" }]}
+            people={persons}
             onAddExpense={this.handleAddExpense}
             onClose={() => {
               this.setState({ addingExpense: false });

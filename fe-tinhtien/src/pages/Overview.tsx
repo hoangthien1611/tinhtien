@@ -7,8 +7,7 @@ import {
 } from "@com.mgmtp.a12/widgets";
 import { RouteComponentProps } from "react-router-dom";
 import { PeopleScreen } from "../components/PeopleScreen";
-import ExpenseScreen from "../components/expense/ExpenseContent";
-
+import ExpenseScreen from "../components/expense/ExpenseScreen";
 
 const menuItems = [
   { label: "People" },
@@ -31,12 +30,13 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
     this.state = {
       activeMenu: "People",
       activityName: "",
-      activityUrl: this.props.match.params.code
+      activityUrl: this.props.match.params.code,
     }
   }
 
   async componentDidMount(): Promise<void> {
-    await this.getActivityName(this.props.match.params.code);
+    const activityUrl = this.props.match.params.code;
+    await this.getActivityName(activityUrl);
     if (this.props.history.action === "POP") {
       this.setState({
         activeMenu: "Expenses"
@@ -66,7 +66,7 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
   }
 
   render(): React.ReactNode {
-    const { activeMenu, activityName, activityUrl } = this.state;
+    const { activeMenu, activityUrl } = this.state;
 
     return (
       <ApplicationFrame
@@ -79,7 +79,7 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
         content={
           activeMenu === "People"
             ? <PeopleScreen activityUrl={activityUrl} />
-            : (activeMenu === "Expense" ? <ExpenseScreen title="Expense" activityUrl={activityUrl}/> : activeMenu)
+            : (activeMenu === "Expenses" ? <ExpenseScreen title="Expenses" activityUrl={activityUrl} /> : activeMenu)
         }
       />
     );

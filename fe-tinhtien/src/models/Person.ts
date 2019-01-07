@@ -1,4 +1,5 @@
-export default interface Person{
-  id: number;
-  name: string;
+export default interface Person {
+    id: number;
+    name: string;
+    active: boolean;
 }
