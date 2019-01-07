@@ -10,19 +10,38 @@
   height: 50%;
 }
 
-.footer {
-  bottom: 0px;
-  height: 40px;
-  position: fixed;
-  width: 100%;
-  color: white;
-  text-align: center;
-}
-
 .main {
   min-width: 100%;
   min-height: 100%;
 }
+
+* {
+  box-sizing: border-box;
+ }
+ *:before,
+ *:after {
+  box-sizing: border-box;
+ }
+ html,
+ body {
+  height: 100%;
+  position: relative;
+ }
+ .main-container {
+  min-height: 100vh;
+  min-width: 100%;
+  overflow: hidden;
+  display: block;
+  position: relative;
+  padding-bottom: 100px; /* height of your footer */
+ }
+ .footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  color: white;
+  text-align: center;
+ }
 
 .icon-small {
   font-size: 32px;
@@ -58,4 +77,9 @@
 
 .warning {
   color: red;
+}
+#root {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
