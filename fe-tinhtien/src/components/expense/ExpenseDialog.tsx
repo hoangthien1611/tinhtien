@@ -14,7 +14,7 @@ import "../../css/expenseDialog.css";
 import Expense from "../../models/Expense";
 import appConstant from "../../utils/appConstant";
 import { compareDateInYearMonthDay } from "../../utils/dateHelper";
-import { setStorage, getStorage} from "../../utils/localStorage";
+import { setStorage, getStorage } from "../../utils/localStorage";
 
 export interface ExpenseDialogProps {
   activityUrl: string;
@@ -64,7 +64,7 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
       this.state.createdDate,
       this.props.expense ? this.props.expense.id : undefined);
     this.props.onClose();
-    this.setState({selectedPersonId:this.getPersonIdByActivityUrl()})
+    this.setState({ selectedPersonId: this.getPersonIdByActivityUrl() })
     setStorage(this.props.activityUrl, this.state.selectedPersonId.toString());
   };
 
@@ -109,10 +109,10 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
     this.setState({ createdDate: value });
   };
 
-  private getPersonIdByActivityUrl():number{
+  private getPersonIdByActivityUrl(): number {
     const personId = getStorage(this.props.activityUrl);
-    if(personId!=null){
-        return parseInt(personId) ;
+    if (personId != null) {
+      return parseInt(personId);
     }
     else return this.props.people[0].id;
   }
