@@ -172,9 +172,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     };
 
     onClearButtonClick = (): void => {
-        this.setState({
-            enteringName: ""
-        })
+        this.setState({ enteringName: "" })
     }
 
     onSaveButtonClick = (): void => {
@@ -182,9 +180,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     }
 
     handleChange = (value: string): void => {
-        this.setState({
-            enteringName: value
-        })
+        this.setState({ enteringName: value })
     }
 
     handleKeyDown(key: string): void {
@@ -228,13 +224,18 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     }
 
     private validateInput(enteringName?: string): string {
+        const { editingPersonIndex, persons } = this.state;
         let trimmedName = this.trimName(enteringName ? enteringName.toLowerCase() : "");
-        if (trimmedName.length === 0) {
+        if (trimmedName.length === 0)
             return appConstant.errorMessage.THE_NAME_MUST_NOT_BE_EMPTY_OR_WHITESPACE;
-        }
-        else if (trimmedName.length > 50)
+        if (trimmedName.length > 50)
             return appConstant.errorMessage.PERSON_NAME_LENGTH;
-        const matchedPersons = this.state.persons.filter(person => {
+        if (editingPersonIndex !== undefined) {
+            if (persons[editingPersonIndex].name === trimmedName) {
+                return "";
+            }
+        }
+        const matchedPersons = persons.filter(person => {
             return person.name.toLowerCase() == trimmedName;
         });
         return matchedPersons.length > 0 ?
