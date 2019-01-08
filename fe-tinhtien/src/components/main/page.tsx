@@ -67,7 +67,6 @@ export default class MainPage extends React.Component<{}, MainPageState> {
               <p>TinhTien</p>
             ]}
             rightSlots={<p>Manage team expenses</p>}
-            className="header"
           />
           <SizeContainer noGutter>
             <Row>
