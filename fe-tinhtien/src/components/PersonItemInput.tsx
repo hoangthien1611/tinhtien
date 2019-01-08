@@ -61,8 +61,7 @@ export class PersonItemInput extends React.Component<PersonItemInputProps, Perso
     }
 
     onCancelEdit = (): void => {
-        const { onCancelEdit } = this.props;
-        onCancelEdit();
+        this.props.onCancelEdit();
     };
 
     onApplyEditResult = (): void => {
@@ -77,10 +76,12 @@ export class PersonItemInput extends React.Component<PersonItemInputProps, Perso
     }
 
     handleKeyDown(key: string): void {
-        const { person, onApplyEditResult, errorMessage } = this.props;
+        const { person, onApplyEditResult, errorMessage, onCancelEdit } = this.props;
         const { enteringName } = this.state;
         if (key === "Enter" && !errorMessage) {
             onApplyEditResult(person, enteringName);
+        } else if (key === "Escape") {
+            onCancelEdit();
         }
     }
 }

@@ -91,6 +91,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                             onChange={event => this.handleChange(event.target.value)}
                             placeholder={appConstant.placeholder.ENTER_NAME}
                             onKeyDown={event => this.handleKeyDown(event.key)}
+                            onFocus={this.handleFocusInput}
                             errorMessage={enteringName.length !== 0 ? this.validateInput(enteringName) : ""}
                             rightButton={
                                 <Button title='Clear' style={{ width: "100%" }} icon={closeIcon} onClick={this.onClearButtonClick} />
@@ -110,6 +111,12 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
             editingPersonIndex: undefined,
             errorMessageEditInput: undefined
         })
+    }
+
+    handleFocusInput = (): void => {
+        if (this.state.editingPersonIndex !== undefined) {
+            this.setState({ editingPersonIndex: undefined })
+        }
     }
 
     onApplyEditResult = async (person: Person, newName: string): Promise<void> => {
@@ -149,11 +156,12 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     onEditPerson = async (person: Person): Promise<void> => {
         const { persons } = this.state;
         persons.forEach((p, index) => {
-            if (p.name === person.name)
+            if (p.name === person.name) {
                 this.setState({
                     editingPersonIndex: index,
                     errorMessageEditInput: undefined
                 })
+            }
         })
     };
 
