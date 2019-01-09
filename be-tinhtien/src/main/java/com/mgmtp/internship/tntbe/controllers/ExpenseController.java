@@ -32,6 +32,5 @@ public class ExpenseController {
     @DeleteMapping("/{expenseID}")
     public String deleteExpense(@PathVariable long expenseID){
         return expenseService.deleteExpense(expenseID);
-
     }
 }

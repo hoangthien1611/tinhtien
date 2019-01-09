@@ -14,8 +14,10 @@ import "../../css/expenseDialog.css";
 import Expense from "../../models/Expense";
 import appConstant from "../../utils/appConstant";
 import { compareDateInYearMonthDay } from "../../utils/dateHelper";
+import { setStorage, getStorage} from "../../utils/localStorage";
 
 export interface ExpenseDialogProps {
+  activityUrl: string;
   people: Person[];
   onClose: () => void;
   onSubmit: (
@@ -47,19 +49,11 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
         amount: expense!.amount.toString(),
         createdDate: new Date(expense!.date)
       } : {
-        selectedPersonId: this.getDefaultPersonId(),
+        selectedPersonId: this.getPersonIdByActivityUrl(),
         name: "",
         amount: "",
         createdDate: new Date()
       }
-  }
-
-  private getDefaultPersonId(): number {
-    const { people, defaultName } = this.props;
-    for (const i in people) {
-      if (people[i].name === defaultName) return people[i].id;
-    }
-    return this.props.people[0].id;
   }
 
   private handleSubmit = () => {
@@ -70,6 +64,8 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
       this.state.createdDate,
       this.props.expense ? this.props.expense.id : undefined);
     this.props.onClose();
+    this.setState({selectedPersonId:this.getPersonIdByActivityUrl()})
+    setStorage(this.props.activityUrl, this.state.selectedPersonId.toString());
   };
 
   private handleDescriptionChange = (
@@ -112,6 +108,16 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
   private handleDateChange = (value: Date) => {
     this.setState({ createdDate: value });
   };
+
+  private getPersonIdByActivityUrl():number{
+    const personId = getStorage(this.props.activityUrl);
+    console.log(this.props.activityUrl);
+    console.log(personId);
+    if(personId!=null){
+        return parseInt(personId) ;
+    }
+    else return this.props.people[0].id;
+  }
 
   private inEditMode(): boolean {
     return typeof this.props.expense != 'undefined';
