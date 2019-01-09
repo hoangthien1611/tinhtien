@@ -101,4 +101,14 @@ public class ExpenseService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The created date must not be null!");
         }
     }
+
+    public void deleteExpense(Long expenseId) {
+        Expense expense = expenseRepository.findById(expenseId).orElse(null);
+        if (expense != null) {
+            expenseRepository.delete(expense);
+        }
+        else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There's no expense with this id!");
+        }
+    }
 }
