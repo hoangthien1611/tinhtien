@@ -19,14 +19,17 @@ public class PersonController {
     }
 
     @GetMapping("/{activityUrl}")
-    public  Object getPersons(@PathVariable String activityUrl){
+    public Object getPersons(@PathVariable String activityUrl) {
         return personService.getPersons(activityUrl);
     }
 
     @PutMapping("")
-    public Object updatePerson(@RequestBody Person person){
+    public Object updatePerson(@RequestBody Person person) {
         return personService.updatePerson(person);
     }
 
-
+    @DeleteMapping("")
+    public String deletePerson(@RequestBody PersonDTO personDTO) {
+        return personService.deletePerson(personDTO);
+    }
 }
