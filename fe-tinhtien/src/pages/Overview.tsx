@@ -8,9 +8,9 @@ import {
 import { RouteComponentProps } from "react-router-dom";
 import { PeopleScreen } from "../components/people/PeopleScreen";
 import ExpenseScreen from "../components/expense/ExpenseScreen";
-import BalanceScreen from "../components/BalanceScreen";
 import OutstandingPayMentScreen from "../components/outstandingpayment/OutStandingPaymentScreen";
 import minorLogo from "../images/minor_logo.png";
+import BalanceScreen from "../components/balance/BalanceScreen";
 
 const menuItems = [
   { label: "People" },
@@ -75,7 +75,7 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
       case "People":
         return <PeopleScreen activityUrl={activityUrl} />
       case "Balance":
-        return <BalanceScreen />
+        return <BalanceScreen activityUrl={activityUrl} />
       case "Outstanding":
         return <OutstandingPayMentScreen activityUrl={activityUrl} />
       default:

@@ -29,15 +29,6 @@ public class ActivityController {
         return activityService.getActivity(url);
     }
 
-    @GetMapping(value = "/{url}/persons")
-    public Object getActivityWithPersonAndExpense(@PathVariable String url) {
-        ActivityDTO activity = activityService.getActivityWithPersonAndExpense(url);
-        if (activity == null) {
-            return new ErrorMessage("Activity doesn't exist!");
-        }
-        return activity;
-    }
-
     @GetMapping(value = "/")
     public List<Activity> getAll() {
         return activityService.getAll();

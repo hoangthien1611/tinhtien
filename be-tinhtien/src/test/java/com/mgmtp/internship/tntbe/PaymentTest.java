@@ -1,6 +1,6 @@
 package com.mgmtp.internship.tntbe;
 
-import com.mgmtp.internship.tntbe.dto.ActivityDTO;
+import com.mgmtp.internship.tntbe.dto.Balance;
 import com.mgmtp.internship.tntbe.dto.PaymentDTO;
 import com.mgmtp.internship.tntbe.dto.PersonDTO;
 import com.mgmtp.internship.tntbe.services.PaymentService;
@@ -13,11 +13,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -25,46 +26,39 @@ public class PaymentTest {
 
     @Autowired
     private PaymentService paymentService;
-    private ActivityDTO activity;
-    private List<PersonDTO> persons;
+    private List<Balance> balances;
+    private PersonDTO person1;
+    private PersonDTO person2;
+    private PersonDTO person3;
+    private PersonDTO person4;
+    private PersonDTO person5;
 
     @Before
     public void initActivity() {
-        persons = new ArrayList<>();
-        activity = new ActivityDTO("Team building", "123456789", persons);
+        balances = new ArrayList<>();
+        person1 = new PersonDTO(1L, "Hoa", true);
+        person2 = new PersonDTO(2L, "Mai", true);
+        person3 = new PersonDTO(3L, "Dao", true);
+        person4 = new PersonDTO(4L, "Cuc", true);
+        person5 = new PersonDTO(5L, "Truc", true);
     }
 
     @Test
-    public void whenWeHave1People() {
-        // Init data
-        persons.add(new PersonDTO(1L, "Hoa", true, 100));
-
+    public void whenWeHaveNoBalance() {
         // Compare the actual number of transfers to pay money to each person with expect number of transfers
-        assertThat(paymentService.getPayments(activity).size()).isEqualTo(0);
+        assertThat(paymentService.getPayments(balances).size()).isEqualTo(0);
     }
 
     @Test
-    public void whenWeHave2PeopleWithSameTotalExpense() {
+    public void whenWeHave2Balances() {
         // Init data
-        persons.add(new PersonDTO(1L, "Hoa", true, 100));
-        persons.add(new PersonDTO(2L, "Mai", true, 100));
-        activity.setPersons(persons);
+        balances.add(new Balance(person1, -50d));
+        balances.add(new Balance(person2, 50d));
 
-        assertThat(paymentService.getPayments(activity).size()).isEqualTo(0);
-    }
-
-    @Test
-    public void whenWeHave2PersonsWithDifferentTotalExpense() {
-        // Init data
-        PersonDTO person1 = new PersonDTO(1L, "Hoa", true, 100);
-        PersonDTO person2 = new PersonDTO(2L, "Mai", true, 200);
-        persons.addAll(Arrays.asList(person1, person2));
-
-        List<PaymentDTO> actualPayments = paymentService.getPayments(activity);
+        List<PaymentDTO> actualPayments = paymentService.getPayments(balances);
 
         // Create a expected list of payments
-        List<PaymentDTO> expectedPayments = new ArrayList<>();
-        expectedPayments.addAll(Arrays.asList(
+        List<PaymentDTO> expectedPayments = new ArrayList<>(Collections.singletonList(
                 new PaymentDTO(person1, person2, 50)
         ));
 
@@ -73,19 +67,17 @@ public class PaymentTest {
     }
 
     @Test
-    public void whenWeHave3PersonsWithDifferentTotalExpense() {
+    public void whenWeHave3Balances() {
         // Init data
-        PersonDTO person1 = new PersonDTO(1L, "Hoa", true, 300);
-        PersonDTO person2 = new PersonDTO(2L, "Mai", true, 100);
-        PersonDTO person3 = new PersonDTO(3L, "Dao", true, 50);
-        persons.addAll(Arrays.asList(person1, person2, person3));
+        balances.add(new Balance(person1, 150d));
+        balances.add(new Balance(person2, -50d));
+        balances.add(new Balance(person3, -100d));
 
 
-        List<PaymentDTO> actualPayments = paymentService.getPayments(activity);
+        List<PaymentDTO> actualPayments = paymentService.getPayments(balances);
 
         // Create a expected list of payments
-        List<PaymentDTO> expectedPayments = new ArrayList<>();
-        expectedPayments.addAll(Arrays.asList(
+        List<PaymentDTO> expectedPayments = new ArrayList<>(Arrays.asList(
                 new PaymentDTO(person3, person1, 100),
                 new PaymentDTO(person2, person1, 50)
         ));
@@ -95,31 +87,18 @@ public class PaymentTest {
     }
 
     @Test
-    public void whenWeHave3PersonsWithSameTotalExpense() {
-        // Init data
-        persons.add(new PersonDTO(1L, "Hoa", true, 100));
-        persons.add(new PersonDTO(2L, "Mai", true, 100));
-        persons.add(new PersonDTO(3L, "Dao", true, 100));
-
-        // Compare the actual number of transfers and expected number of transfers
-        assertThat(paymentService.getPayments(activity).size()).isEqualTo(0);
-    }
-
-    @Test
     // When a activity have 4 people and they only need 2 transfer to pay money for each other
-    public void whenWeHave4PersonsWith2PairPersons() {
+    public void whenWeHave4BalancesWith2Pair() {
         // Init data
-        PersonDTO person1 = new PersonDTO(1L, "Mai", true, 80);
-        PersonDTO person2 = new PersonDTO(2L, "Hoa", true, 120);
-        PersonDTO person3 = new PersonDTO(3L, "Dao", true, 140);
-        PersonDTO person4 = new PersonDTO(4L, "Cuc", true, 60);
-        persons.addAll(Arrays.asList(person1, person2, person3, person4));
+        balances.add(new Balance(person1, -20d));
+        balances.add(new Balance(person2, 20d));
+        balances.add(new Balance(person3, 40d));
+        balances.add(new Balance(person4, -40d));
 
-        List<PaymentDTO> actualPayments = paymentService.getPayments(activity);
+        List<PaymentDTO> actualPayments = paymentService.getPayments(balances);
 
         // Create a expected list of payments
-        List<PaymentDTO> expectedPayments = new ArrayList<>();
-        expectedPayments.addAll(Arrays.asList(
+        List<PaymentDTO> expectedPayments = new ArrayList<>(Arrays.asList(
                 new PaymentDTO(person4, person3, 40),
                 new PaymentDTO(person1, person2, 20)
         ));
@@ -129,19 +108,17 @@ public class PaymentTest {
     }
 
     @Test
-    public void whenWeHave4Persons() {
+    public void whenWeHave4Balances() {
         // Init data
-        PersonDTO person1 = new PersonDTO(1L, "Mai", true, 170);
-        PersonDTO person2 = new PersonDTO(2L, "Hoa", true, 225);
-        PersonDTO person3 = new PersonDTO(3L, "Dao", true, 190);
-        PersonDTO person4 = new PersonDTO(4L, "Cuc", true, 215);
-        persons.addAll(Arrays.asList(person1, person2, person3, person4));
+        balances.add(new Balance(person1, -30d));
+        balances.add(new Balance(person2, 25d));
+        balances.add(new Balance(person3, -10d));
+        balances.add(new Balance(person4, 15d));
 
-        List<PaymentDTO> actualPayments = paymentService.getPayments(activity);
+        List<PaymentDTO> actualPayments = paymentService.getPayments(balances);
 
         // Create a expected list of payments
-        List<PaymentDTO> expectedPayments = new ArrayList<>();
-        expectedPayments.addAll(Arrays.asList(
+        List<PaymentDTO> expectedPayments = new ArrayList<>(Arrays.asList(
                 new PaymentDTO(person1, person2, 25),
                 new PaymentDTO(person3, person4, 10),
                 new PaymentDTO(person1, person4, 5)
@@ -152,20 +129,18 @@ public class PaymentTest {
     }
 
     @Test
-    public void whenWeHave5PersonsWithHave1PairPersons() {
+    public void whenWeHave5BalancesWithHave1Pair() {
         // Init data
-        PersonDTO person1 = new PersonDTO(1L, "Mai", true, 30);
-        PersonDTO person2 = new PersonDTO(2L, "Hoa", true, 80);
-        PersonDTO person3 = new PersonDTO(3L, "Dao", true, 20);
-        PersonDTO person4 = new PersonDTO(4L, "Cuc", true, 60);
-        PersonDTO person5 = new PersonDTO(5L, "Anh", true, 60);
-        persons.addAll(Arrays.asList(person1, person2, person3, person4, person5));
+        balances.add(new Balance(person1, -20d));
+        balances.add(new Balance(person2, 30d));
+        balances.add(new Balance(person3, -30d));
+        balances.add(new Balance(person4, 10d));
+        balances.add(new Balance(person5, 10d));
 
-        List<PaymentDTO> actualPayments = paymentService.getPayments(activity);
+        List<PaymentDTO> actualPayments = paymentService.getPayments(balances);
 
         // Create a expected list of payments
-        List<PaymentDTO> expectedPayments = new ArrayList<>();
-        expectedPayments.addAll(Arrays.asList(
+        List<PaymentDTO> expectedPayments = new ArrayList<>(Arrays.asList(
                 new PaymentDTO(person3, person2, 30),
                 new PaymentDTO(person1, person4, 10),
                 new PaymentDTO(person1, person5, 10)
@@ -176,20 +151,18 @@ public class PaymentTest {
     }
 
     @Test
-    public void whenWeHave5Persons() {
+    public void whenWeHave5Balances() {
         // Init data
-        PersonDTO person1 = new PersonDTO(1L, "Mai", true, 20);
-        PersonDTO person2 = new PersonDTO(2L, "Hoa", true, 75);
-        PersonDTO person3 = new PersonDTO(3L, "Dao", true, 8);
-        PersonDTO person4 = new PersonDTO(4L, "Cuc", true, 12);
-        PersonDTO person5 = new PersonDTO(5L, "Anh", true, 85);
-        persons.addAll(Arrays.asList(person1, person2, person3, person4, person5));
+        balances.add(new Balance(person1, -20d));
+        balances.add(new Balance(person2, 35d));
+        balances.add(new Balance(person3, -32d));
+        balances.add(new Balance(person4, -28d));
+        balances.add(new Balance(person5, 45d));
 
-        List<PaymentDTO> actualPayments = paymentService.getPayments(activity);
+        List<PaymentDTO> actualPayments = paymentService.getPayments(balances);
 
         // Create a expected list of payments
-        List<PaymentDTO> expectedPayments = new ArrayList<>();
-        expectedPayments.addAll(Arrays.asList(
+        List<PaymentDTO> expectedPayments = new ArrayList<>(Arrays.asList(
                 new PaymentDTO(person3, person5, 32),
                 new PaymentDTO(person4, person2, 28),
                 new PaymentDTO(person1, person5, 13),

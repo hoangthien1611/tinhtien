@@ -1,6 +1,5 @@
 package com.mgmtp.internship.tntbe.services;
 
-import com.mgmtp.internship.tntbe.dto.ActivityDTO;
 import com.mgmtp.internship.tntbe.dto.Balance;
 import com.mgmtp.internship.tntbe.dto.PaymentDTO;
 import com.mgmtp.internship.tntbe.utils.ListBalanceUtil;
@@ -16,16 +15,7 @@ import java.util.List;
 public class PaymentService {
 
     @Autowired
-    ActivityService activityService;
-
-    public List<PaymentDTO> getPayments(ActivityDTO activity) {
-        List<PaymentDTO> paymentDTOS = new ArrayList<>();
-        if (activity.getPersons() != null && activity.getPersons().size() > 0) {
-            List<Balance> balances = ListBalanceUtil.getListBalance(activity);
-            paymentDTOS = getPayments(balances);
-        }
-        return paymentDTOS;
-    }
+    private BalanceService balanceService;
 
     /*
         This method get paymentDTOs from balances:
@@ -42,7 +32,7 @@ public class PaymentService {
                      balances's element.
                 2.4. Sort list balance in increasing order of money
      */
-    private List<PaymentDTO> getPayments(List<Balance> balances) {
+    public List<PaymentDTO> getPayments(List<Balance> balances) {
         balances.sort(Comparator.comparing(Balance::getMoney));
         List<PaymentDTO> paymentDTOS = new ArrayList<>();
         while (true) {

@@ -1,11 +1,10 @@
 package com.mgmtp.internship.tntbe.utils;
 
-import com.mgmtp.internship.tntbe.dto.ActivityDTO;
 import com.mgmtp.internship.tntbe.dto.Balance;
-import com.mgmtp.internship.tntbe.dto.PersonDTO;
+import com.mgmtp.internship.tntbe.dto.BalanceDTO;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ListBalanceUtil {
     // Find the index of the opposite money of balance
@@ -45,15 +44,11 @@ public class ListBalanceUtil {
         return balances;
     }
 
-    public static List<Balance> getListBalance(ActivityDTO activity) {
-        List<Balance> balances = new ArrayList<>();
-        double avgMoney = activity.getTotalExpense() / activity.getPersons().size();
-        for (PersonDTO person : activity.getPersons()) {
-            if (Math.abs(person.getTotalExpense() - avgMoney) >= 0.01) {
-                Balance balance = new Balance(person, person.getTotalExpense() - avgMoney);
-                balances.add(balance);
-            }
-        }
-        return balances;
+    public static List<Balance> convertAndFilter(List<BalanceDTO> balanceDTOS) {
+        return balanceDTOS
+                .stream()
+                .map(balanceDTO -> new Balance(balanceDTO.getPerson(), balanceDTO.getPayBack()))
+                .filter(balance -> Math.abs(balance.getMoney()) >= 0.01)
+                .collect(Collectors.toList());
     }
 }

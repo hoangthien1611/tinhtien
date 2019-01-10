@@ -2,10 +2,7 @@ package com.mgmtp.internship.tntbe.services;
 
 import com.mgmtp.internship.tntbe.dto.ActivityDTO;
 import com.mgmtp.internship.tntbe.dto.ErrorMessage;
-import com.mgmtp.internship.tntbe.dto.PersonDTO;
 import com.mgmtp.internship.tntbe.entities.Activity;
-import com.mgmtp.internship.tntbe.entities.Expense;
-import com.mgmtp.internship.tntbe.entities.Person;
 import com.mgmtp.internship.tntbe.repositories.ActivityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +11,6 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -56,27 +52,6 @@ public class ActivityService {
         Activity activity = activityRepository.findByUrl(url);
         if (activity != null) {
             return new ActivityDTO(activity.getName(), activity.getUrl());
-        } else return null;
-    }
-
-    public ActivityDTO getActivityWithPersonAndExpense(String url) {
-        Activity activity = activityRepository.findByUrl(url);
-        if (activity != null) {
-            List<PersonDTO> persons = new ArrayList<>();
-            if(activity.getPersons() != null && activity.getPersons().size() > 0) {
-                for (Person person : activity.getPersons()) {
-                    double totalExpenseOfPerson = 0;
-                    if(person.isActive()) {
-                        if(person.getPaidExpenses() != null && person.getPaidExpenses().size() > 0) {
-                            for(Expense expenses : person.getPaidExpenses()) {
-                                totalExpenseOfPerson += expenses.getAmount();
-                            }
-                        }
-                    }
-                    persons.add(new PersonDTO(person.getId(), person.getName(), person.isActive(), totalExpenseOfPerson));
-                }
-            }
-            return new ActivityDTO(activity.getName(), activity.getUrl(), persons);
         } else return null;
     }
 

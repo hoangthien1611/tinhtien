@@ -23,11 +23,4 @@ public class ActivityDTO {
         this.name = name;
         this.url = url;
     }
-
-    public double getTotalExpense() {
-        if (this.persons == null) {
-            return 0;
-        }
-        return this.persons.stream().map(PersonDTO::getTotalExpense).reduce(0d, Double::sum);
-    }
 }

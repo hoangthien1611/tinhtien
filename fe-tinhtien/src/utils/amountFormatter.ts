@@ -8,3 +8,7 @@ export default function commafy(amount: number): string {
   }
   return str.join(".");
 }
+
+export function formatToCurrency(num: number) {
+  return num.toFixed(2).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+}
