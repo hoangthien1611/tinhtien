@@ -54,7 +54,7 @@ public class ExpenseService {
         }
 
         List<Person> people = activity.getPersons();
-        return expenseRepository.findAllByPersonInOrderByCreatedDateAsc(people);
+        return expenseRepository.findAllByPayerInOrderByCreatedDateAsc(people);
     }
 
     public Expense updateExpense(ExpenseDTO expenseDTO) {
@@ -68,11 +68,11 @@ public class ExpenseService {
                 .findById(expenseDTO.getPersonId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Person is not found!"));
 
-        if (expenseNeedChange.getPerson().getActivity().getId() != newPerson.getActivity().getId()) {
+        if (expenseNeedChange.getPayer().getActivity().getId() != newPerson.getActivity().getId()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The person is not belongs to this activity!");
         }
 
-        expenseNeedChange.setPerson(newPerson);
+        expenseNeedChange.setPayer(newPerson);
         expenseNeedChange.setName(StringUtils.normalizeSpace(expenseDTO.getName()));
         expenseNeedChange.setAmount(expenseDTO.getAmount());
         expenseNeedChange.setCreatedDate(expenseDTO.getCreatedDate());

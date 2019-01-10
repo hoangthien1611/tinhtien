@@ -85,7 +85,7 @@ export const deleteExpense = (id: number,
 }
 
 function parserTo(jsonObject: any): Expense {
-  const person = { id: jsonObject.person.id, name: jsonObject.person.name, active: jsonObject.person.active }
+  const person = { id: jsonObject.payer.id, name: jsonObject.payer.name, active: jsonObject.payer.active }
   const createdDate = convertUTCToLocalDate(jsonObject.createdDate)
   return {
     id: jsonObject.id,

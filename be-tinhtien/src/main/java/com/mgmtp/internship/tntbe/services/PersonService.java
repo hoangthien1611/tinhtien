@@ -83,7 +83,7 @@ public class PersonService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This person is not existing!");
         } else if (!optionalPerson.get().getActivity().getUrl().equals(personDTO.getActivityUrl())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This person is not existing in this activity!");
-        } else if (!expenseRepository.findAllByPerson_Id(personDTO.getId()).isEmpty()) {
+        } else if (!expenseRepository.findAllByPayer_Id(personDTO.getId()).isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can not delete this person because he/she has paid for something!");
         } else {
             personRepository.delete(optionalPerson.get());

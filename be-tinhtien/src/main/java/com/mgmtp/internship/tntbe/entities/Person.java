@@ -5,7 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -35,7 +37,16 @@ public class Person {
         this.activity = activity;
     }
 
-    @OneToMany(mappedBy = "person")
+    @OneToMany(mappedBy = "payer")
     @JsonIgnore
-    private List<Expense> expenses;
+    private List<Expense> paidExpenses;
+
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            },
+            mappedBy = "participants")
+    @JsonIgnore
+    private Set<Expense> participatedExpenses = new HashSet<>();
 }

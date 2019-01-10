@@ -1,0 +1,19 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="createExpensePersonTable" author="thnguyen">
+        <createTable tableName="expense_person">
+            <column name="expense_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_expense_person_expenses" references="expenses(id)"/>
+            </column>
+            <column name="person_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_expense_person_person" references="person(id)"/>
+            </column>
+        </createTable>
+        <addPrimaryKey columnNames="expense_id, person_id" tableName="expense_person"/>
+    </changeSet>
+</databaseChangeLog>

@@ -67,8 +67,8 @@ public class ActivityService {
                 for (Person person : activity.getPersons()) {
                     double totalExpenseOfPerson = 0;
                     if(person.isActive()) {
-                        if(person.getExpenses() != null && person.getExpenses().size() > 0) {
-                            for(Expense expenses : person.getExpenses()) {
+                        if(person.getPaidExpenses() != null && person.getPaidExpenses().size() > 0) {
+                            for(Expense expenses : person.getPaidExpenses()) {
                                 totalExpenseOfPerson += expenses.getAmount();
                             }
                         }
