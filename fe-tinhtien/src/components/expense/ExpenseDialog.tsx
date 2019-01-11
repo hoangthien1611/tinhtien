@@ -13,6 +13,7 @@ import { ValidateResult } from "./ValidateResult";
 import "../../css/expenseDialog.css";
 import Expense from "../../models/Expense";
 import appConstant from "../../utils/appConstant";
+import { compareDateInYearMonthDay } from "../../utils/dateHelper";
 
 export interface ExpenseDialogProps {
   people: Person[];
@@ -39,12 +40,12 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
   constructor(props: ExpenseDialogProps) {
     super(props);
     const expense = props.expense;
-    this.state = expense ?
+    this.state = this.inEditMode() ?
       {
-        selectedPersonId: expense.person.id,
-        name: expense.name,
-        amount: expense.amount.toString(),
-        createdDate: new Date(expense.date)
+        selectedPersonId: expense!.person.id,
+        name: expense!.name,
+        amount: expense!.amount.toString(),
+        createdDate: new Date(expense!.date)
       } : {
         selectedPersonId: this.getDefaultPersonId(),
         name: "",
@@ -105,23 +106,36 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
   }
 
   private handlePersonChange = (personId: string) => {
-    this.setState({ selectedPersonId: (personId as any) as number });
+    this.setState({ selectedPersonId: Number(personId) });
   };
 
   private handleDateChange = (value: Date) => {
     this.setState({ createdDate: value });
   };
 
+  private inEditMode(): boolean {
+    return typeof this.props.expense != 'undefined';
+  }
+
+  private noChangeInEditMode(): boolean {
+    if (!this.inEditMode()) return false;
+    const { expense } = this.props;
+    const { amount, selectedPersonId, name, createdDate } = this.state;
+    return expense!.amount === Number(amount.trim()) && compareDateInYearMonthDay(expense!.date, createdDate) === 0
+      && expense!.name === name && expense!.person.id === selectedPersonId;
+  }
+
   render(): React.ReactNode {
     const validateDescriptionResult: ValidateResult = this.validateDescription(this.state.name);
     const validateAmountResult: ValidateResult = this.validateAmount(this.state.amount);
-
+    const disableSubmitButton = this.noChangeInEditMode() || validateAmountResult !== ValidateResult.Ok ||
+      validateDescriptionResult !== ValidateResult.Ok;
     return (
+
       <ModalOverlay>
         <ActionContentbox
           headingElements={this.createDialogHeader()}
-          footer={this.createDialogFooter(validateAmountResult !== ValidateResult.Ok ||
-            validateDescriptionResult !== ValidateResult.Ok)}
+          footer={this.createDialogFooter(disableSubmitButton)}
         >
           {this.createDialogContent(validateDescriptionResult, validateAmountResult)}
         </ActionContentbox>
@@ -134,7 +148,7 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
     return <ContentBoxElements.Title text={title} />
   }
 
-  private createDialogFooter(showSubmitbutton: boolean): React.ReactNode {
+  private createDialogFooter(disableSubmitButton: boolean): React.ReactNode {
     const { onClose } = this.props;
     return (
       <ContentBoxElements.Footer style={{ marginTop: "20px", float: "right" }}>
@@ -142,7 +156,7 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
           onClick={this.handleSubmit}
           primary
           className="control-button"
-          disabled={showSubmitbutton}
+          disabled={disableSubmitButton}
         >
           Ok
         </Button>

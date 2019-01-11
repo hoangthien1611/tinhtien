@@ -1,11 +1,12 @@
 package com.mgmtp.internship.tntbe.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.sql.Timestamp;
 
 @Data
 @Entity
@@ -17,7 +18,7 @@ public class Expense {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    public Expense(Person person, String name, double amount, Date createdDate) {
+    public Expense(Person person, String name, double amount, Timestamp createdDate) {
         this.person = person;
         this.name = name;
         this.amount = amount;
@@ -35,5 +36,5 @@ public class Expense {
     private double amount;
 
     @Column(name = "created_date")
-    private Date createdDate;
+    private Timestamp createdDate;
 }

@@ -184,14 +184,13 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
 
   private addExpenseInLocal(originExpenses: Expense[], addExpense: Expense) {
     const newExpenses = originExpenses.slice()
-    let i = newExpenses.length - 1;
-    while (i >= 0) {
-      if (compareDateInYearMonthDay(newExpenses[i].date, addExpense.date) <= 0) {
+    let insertPosition = 0;
+    for (; insertPosition < newExpenses.length; insertPosition++) {
+      if (compareDateInYearMonthDay(newExpenses[insertPosition].date, addExpense.date) > 0) {
         break;
       }
-      i--;
     }
-    newExpenses.splice(i + 1, 0, addExpense);
+    newExpenses.splice(insertPosition, 0, addExpense);
     return newExpenses;
   }
 

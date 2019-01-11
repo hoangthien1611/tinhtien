@@ -1,6 +1,6 @@
 import { addData, getData, updateData } from "../utils/apiCaller"
 import Expense from "../models/Expense"
-
+import { convertUTCToLocalDate } from "../utils/dateHelper";
 const baseUrl = "api/expense/";
 
 export const addExpense = (name: string, amount: number, personId: number, createdDate: Date,
@@ -73,11 +73,12 @@ export const editExpense = (id: number, name: string, amount: number, personId: 
 
 function parserTo(jsonObject: any): Expense {
   const person = { id: jsonObject.person.id, name: jsonObject.person.name, active: jsonObject.person.active }
+  const createdDate = convertUTCToLocalDate(jsonObject.createdDate)
   return {
     id: jsonObject.id,
     name: jsonObject.name,
     person: person,
     amount: jsonObject.amount,
-    date: jsonObject.createdDate
+    date: createdDate
   };
 }
