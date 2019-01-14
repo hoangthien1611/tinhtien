@@ -6,7 +6,7 @@ import {
   FlyoutMenu
 } from "@com.mgmtp.a12/widgets";
 import { RouteComponentProps } from "react-router-dom";
-import { PeopleScreen } from "../components/PeopleScreen";
+import { PeopleScreen } from "../components/people/PeopleScreen";
 import ExpenseScreen from "../components/expense/ExpenseScreen";
 import BalanceScreen from "../components/BalanceScreen";
 import OutstandingPayMentScreen from "../components/outstandingpayment/OutStandingPaymentScreen";

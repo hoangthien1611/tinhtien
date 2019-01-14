@@ -1,7 +1,7 @@
 import React from 'react';
 import { Icon, Button, TextLineStateless } from "@com.mgmtp.a12/widgets";
-import Person from '../models/Person';
-import appConstant from '../utils/appConstant'
+import Person from '../../models/Person';
+import appConstant from '../../utils/appConstant';
 const editIcon = <Icon>edit</Icon>;
 const editButton = <Button iconButton icon={editIcon} disabled />;
 
@@ -26,7 +26,7 @@ export class PersonItemInput extends React.Component<PersonItemInputProps, Perso
     }
 
     render(): React.ReactNode {
-        const { errorMessage } = this.props;
+        const { errorMessage, person } = this.props;
         return (
             <>
                 <div className="field__message" hidden={errorMessage ? errorMessage.length > 0 : false}>

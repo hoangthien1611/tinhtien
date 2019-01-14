@@ -1,22 +1,25 @@
 import React from 'react';
-import { List, TextLineStateless, Icon, Button } from "@com.mgmtp.a12/widgets";
-import Person from "../models/Person";
+import { List, TextLineStateless, Icon, Button, ProgressIndicator, ModalNotification } from "@com.mgmtp.a12/widgets";
+import Person from "../../models/Person";
 import { PersonItem } from "./PersonItem";
 import { PersonItemInput } from "./PersonItemInput";
-import appConstant from '../utils/appConstant';
-import scrollIntoView from 'scroll-into-view-if-needed'
+import appConstant from '../../utils/appConstant';
+import scrollIntoView from 'scroll-into-view-if-needed';
+import { getData, addData, updateData, deleteData } from '../../utils/apiCaller';
 
 const closeIcon = <Icon>close</Icon>;
 
 interface PeopleScreenState {
-	persons: Person[];
-	enteringName?: string;
-	editingPersonIndex?: number;
-	errorMessageEditInput?: string;
+    persons: Person[];
+    enteringName?: string;
+    editingPersonIndex?: number;
+    errorMessageEditInput?: string;
+    loading: boolean;
+    deleteMessage?: string;
 }
 
 interface PeopleScreenProps {
-	activityUrl: string
+    activityUrl: string
 }
 
 export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScreenState> {
@@ -27,19 +30,22 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
             persons: [],
             enteringName: undefined,
             editingPersonIndex: undefined,
-            errorMessageEditInput: undefined
+            errorMessageEditInput: undefined,
+            loading: false,
+            deleteMessage: undefined
         }
     }
 
     async componentDidMount(): Promise<void> {
+        this.toggleLoading();
         await this.getListPerson(this.props.activityUrl);
+        this.toggleLoading();
     }
 
     async getListPerson(activityUrl: string): Promise<void> {
         try {
             const url: string = "api/person/" + activityUrl;
-            const result = await fetch(url);
-            const persons = await result.json() as Person[];
+            const persons = await getData(url) as Person[];
             const personsFiltered = persons.filter(person => person.active)
             this.setState({
                 persons: personsFiltered
@@ -50,7 +56,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     }
 
     render(): React.ReactNode {
-        let { persons, enteringName, editingPersonIndex, errorMessageEditInput } = this.state;
+        let { persons, enteringName, editingPersonIndex, errorMessageEditInput, loading, deleteMessage } = this.state;
         enteringName = enteringName ? enteringName : "";
         return (
             <>
@@ -101,9 +107,35 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                         <Button title='Save' label="Save" primary style={{ float: "right" }} disabled={this.validateInput(enteringName) !== ""} onClick={this.onSaveButtonClick} />
                     </>
                 }
+                {loading && <ProgressIndicator />}
+
+                {deleteMessage && <ModalNotification
+                    variant={deleteMessage.indexOf("successfully") > 0 ? "success" : "error"}
+                    onClose={this.closeModal}
+                    title={"Delete"}
+                    footer={
+                        <div style={{ textAlign: "right" }}>
+                            <Button primary destructive onClick={this.closeModal} label="Close" />
+                        </div>
+                    }
+                >
+                    {deleteMessage}
+                </ModalNotification>
+                }
+
             </>
 
         );
+    };
+
+    closeModal = (): void => {
+        this.setState({ deleteMessage: undefined })
+    }
+
+    toggleLoading = (): void => {
+        this.setState({
+            loading: !this.state.loading
+        });
     };
 
     onCancelEdit = (): void => {
@@ -134,13 +166,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                 persons: personsEdited
 
             })
-            await fetch('api/person', {
-                method: "PUT",
-                body: JSON.stringify({ name: this.trimName((newName).trim()), id: person.id }),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
+            await updateData('api/person', { name: this.trimName((newName).trim()), id: person.id });
         } catch (error) {
             console.log(error);
         }
@@ -148,15 +174,24 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     }
 
     private handleChangeEditInput = (value?: string): void => {
-        this.setState({
-            errorMessageEditInput: this.validateInput(value)
-        })
+        const { editingPersonIndex, persons } = this.state;
+        if (editingPersonIndex !== undefined) {
+            if (persons[editingPersonIndex].name === this.trimName(value ? value.toLowerCase() : "")) {
+                this.setState({
+                    errorMessageEditInput: ""
+                })
+            } else {
+                this.setState({
+                    errorMessageEditInput: this.validateInput(value ? value.toLowerCase() : "")
+                })
+            }
+        }
     }
 
     onEditPerson = async (person: Person): Promise<void> => {
         const { persons } = this.state;
         persons.forEach((p, index) => {
-            if (p.name === person.name) {
+            if (p.id === person.id) {
                 this.setState({
                     editingPersonIndex: index,
                     errorMessageEditInput: undefined
@@ -166,9 +201,23 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     };
 
     onDeletePerson = async (person: Person): Promise<void> => {
-        this.setState({
-            persons: this.state.persons.filter(p => p.id !== person.id)
-        });
+        try {
+            this.toggleLoading();
+            const result = await deleteData('api/person', { id: person.id, activityUrl: this.props.activityUrl });
+            this.toggleLoading();
+            if (result.status) {
+                this.setState({
+                    deleteMessage: result.message
+                });
+            } else {
+                this.setState({
+                    persons: this.state.persons.filter(p => p.id !== person.id),
+                    deleteMessage: result.message
+                });
+            }
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     onClearButtonClick = (): void => {
@@ -195,18 +244,13 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
         // Add person if have no error
         if (this.validateInput(enteringName) === "") {
             try {
-                const response = await fetch('api/person', {
-                    method: "POST",
-                    body: JSON.stringify({ name: this.trimName((enteringName || "").trim()), activityUrl }),
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                });
-                const newPerson = (await response.json()) as Person;
+                this.toggleLoading();
+                const newPerson = await addData('api/person', { name: this.trimName((enteringName || "").trim()), activityUrl }) as Person;
                 this.setState({
                     persons: [...persons, newPerson],
                     enteringName: undefined,
                 });
+                this.toggleLoading();
                 if (this.inputRef) {
                     this.inputRef.focus();
                     scrollIntoView(this.inputRef, { behavior: 'smooth', scrollMode: 'if-needed' })
@@ -224,17 +268,12 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     }
 
     private validateInput(enteringName?: string): string {
-        const { editingPersonIndex, persons } = this.state;
+        const { persons } = this.state;
         let trimmedName = this.trimName(enteringName ? enteringName.toLowerCase() : "");
         if (trimmedName.length === 0)
             return appConstant.errorMessage.THE_NAME_MUST_NOT_BE_EMPTY_OR_WHITESPACE;
         if (trimmedName.length > 50)
             return appConstant.errorMessage.PERSON_NAME_LENGTH;
-        if (editingPersonIndex !== undefined) {
-            if (persons[editingPersonIndex].name === trimmedName) {
-                return "";
-            }
-        }
         const matchedPersons = persons.filter(person => {
             return person.name.toLowerCase() == trimmedName;
         });
