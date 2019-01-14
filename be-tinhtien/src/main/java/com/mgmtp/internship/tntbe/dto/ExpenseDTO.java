@@ -11,8 +11,10 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 public class ExpenseDTO {
     private long id;
-    private long personId;
+    private long payerId;
     private String name;
     private double amount;
     private Timestamp createdDate;
+    private long[] participantIds;
+    private String activityUrl;
 }

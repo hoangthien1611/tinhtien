@@ -1,5 +1,6 @@
 package com.mgmtp.internship.tntbe.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,11 +21,12 @@ public class Expense {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    public Expense(Person payer, String name, double amount, Timestamp createdDate) {
+    public Expense(Person payer, String name, double amount, Timestamp createdDate, Set<Person> participants) {
         this.payer = payer;
         this.name = name;
         this.amount = amount;
         this.createdDate = createdDate;
+        this.participants = participants;
     }
 
     @ManyToOne(optional = false)
