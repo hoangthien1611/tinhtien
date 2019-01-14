@@ -2,6 +2,7 @@ package com.mgmtp.internship.tntbe.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -47,5 +48,6 @@ public class Expense {
     @JoinTable(name = "expense_person",
             joinColumns = {@JoinColumn(name = "expense_id")},
             inverseJoinColumns = {@JoinColumn(name = "person_id")})
+    @EqualsAndHashCode.Exclude
     private Set<Person> participants = new HashSet<>();
 }

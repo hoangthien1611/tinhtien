@@ -2,6 +2,7 @@ package com.mgmtp.internship.tntbe.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -48,5 +49,6 @@ public class Person {
             },
             mappedBy = "participants")
     @JsonIgnore
+    @EqualsAndHashCode.Exclude
     private Set<Expense> participatedExpenses = new HashSet<>();
 }
