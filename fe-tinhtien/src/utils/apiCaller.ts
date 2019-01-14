@@ -9,7 +9,7 @@ export default function callApi(
       "Content-type": "application/json",
       Accept: "application/json"
     },
-    body: JSON.stringify(body)
+    body: body?JSON.stringify(body): undefined
   }).then(
     rawResult => { return rawResult.json() }
   );
@@ -27,6 +27,6 @@ export function getData(url: string, body?: any): Promise<any> {
   return callApi(url, "GET", body);
 }
 
-export function deleteData(url: string, body?: any): Promise<any> {
-  return callApi(url, "DELETE", body);
+export function deleteData(url: string): Promise<any> {
+  return callApi(url, "DELETE");
 }

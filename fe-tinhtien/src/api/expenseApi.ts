@@ -1,4 +1,4 @@
-import { addData, getData, updateData } from "../utils/apiCaller"
+import { addData, getData, updateData, deleteData } from "../utils/apiCaller"
 import Expense from "../models/Expense"
 import { convertUTCToLocalDate } from "../utils/dateHelper";
 const baseUrl = "api/expense/";
@@ -69,6 +69,19 @@ export const editExpense = (id: number, name: string, amount: number, personId: 
       }
     }
   )
+}
+export const deleteExpense = (id: number,
+  onSuccess: () => void,
+  onFailure: (errorMessage: string) => void
+) => {
+  deleteData(baseUrl + id)
+    .then(
+      jsonResult => {
+        if (jsonResult.error) {
+          onFailure(jsonResult.message);
+        } else onSuccess();
+      }
+    )
 }
 
 function parserTo(jsonObject: any): Expense {

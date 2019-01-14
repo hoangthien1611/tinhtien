@@ -23,16 +23,18 @@ export const ExpenseItem: React.SFC<ExpenseItemProps> = (props: ExpenseItemProps
       meta={
         <>
           <Button
-            iconButton
+            iconButton secondary
             icon={<Icon>edit</Icon>}
             title="Edit"
+            style={{ margin: '0 10px' }}
             onClick={() => props.onEdit(props.expense)} />
           <Button
-            iconButton
+            iconButton secondary
             destructive
-            onClick={() => props.onDelete(props.expense)}
             icon={<Icon>delete</Icon>}
             title="Delete"
+            style={{ margin: '0 10px' }}
+            onClick={() => props.onDelete(props.expense)}
           />
         </>
       }

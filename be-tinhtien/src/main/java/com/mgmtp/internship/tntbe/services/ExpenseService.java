@@ -102,10 +102,11 @@ public class ExpenseService {
         }
     }
 
-    public void deleteExpense(Long expenseId) {
+    public String deleteExpense(Long expenseId) {
         Expense expense = expenseRepository.findById(expenseId).orElse(null);
         if (expense != null) {
             expenseRepository.delete(expense);
+            return "{ \"message\": \"Delete expense successfully!\" }";
         }
         else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There's no expense with this id!");
