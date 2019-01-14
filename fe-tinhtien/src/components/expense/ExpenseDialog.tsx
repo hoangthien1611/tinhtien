@@ -111,8 +111,6 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
 
   private getPersonIdByActivityUrl():number{
     const personId = getStorage(this.props.activityUrl);
-    console.log(this.props.activityUrl);
-    console.log(personId);
     if(personId!=null){
         return parseInt(personId) ;
     }
