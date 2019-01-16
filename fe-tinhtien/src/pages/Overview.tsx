@@ -10,6 +10,7 @@ import { PeopleScreen } from "../components/people/PeopleScreen";
 import ExpenseScreen from "../components/expense/ExpenseScreen";
 import BalanceScreen from "../components/BalanceScreen";
 import OutstandingPayMentScreen from "../components/outstandingpayment/OutStandingPaymentScreen";
+import minorLogo from "../images/minor_logo.png";
 
 const menuItems = [
   { label: "People" },
@@ -40,6 +41,7 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
   async componentDidMount(): Promise<void> {
     const activityUrl = this.props.match.params.code;
     await this.getActivityName(activityUrl);
+    document.title = this.state.activityName + " - tinhtien.org";
     if (this.props.history.action === "POP") {
       this.setState({
         activeMenu: "Expenses"
@@ -68,7 +70,7 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
     }));
   }
 
-  private renderSwitch(activityName: string, activityUrl: string, activeMenu: string) {
+  private renderSwitch(activityUrl: string, activeMenu: string) {
     switch (activeMenu) {
       case "People":
         return <PeopleScreen activityUrl={activityUrl} />
@@ -80,6 +82,18 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
         return <ExpenseScreen title="Expenses" activityUrl={activityUrl} />
     }
   }
+  private shortenActivityName(activityName: string) {
+    let maximumLength = 40;
+    if (activityName.length <= maximumLength) {
+      return activityName;
+    }
+    for (let i = maximumLength; i > 1; i--) {
+      if (activityName[i] === " ") {
+        return activityName.substring(0, i) + " ...";
+      }
+    }
+    return activityName.substring(0, maximumLength) + " ...";
+  }
 
   render(): React.ReactNode {
     const { activityName, activeMenu, activityUrl } = this.state;
@@ -89,13 +103,20 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
         <ApplicationFrame
           main={
             <div>
-              <ApplicationHeader leftSlots="TNT" />
+              <ApplicationHeader
+                leftSlots={[
+                  <a href="#">
+                    <img src={minorLogo} />
+                  </a>,
+                  <p>TinhTien</p>
+                ]}
+                rightSlots={this.shortenActivityName(activityName)} />
               <FlyoutMenu type="horizontal" items={this.getMenuItems()} />
             </div>
           }
           sub={undefined}
           content={
-            this.renderSwitch(activityName, activityUrl, activeMenu)
+            this.renderSwitch(activityUrl, activeMenu)
           }
         />
       </div>
