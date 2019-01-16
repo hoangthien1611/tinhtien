@@ -45,7 +45,7 @@ export const ExpenseItem: React.SFC<ExpenseItemProps> = (props: ExpenseItemProps
 function generateExpenseText(expense: Expense) {
   return (
     <TextOutput>
-      <span className="person-name">{expense.person.name}</span> paid{" "}
+      <span className="person-name">{expense.payer.name}</span> paid{" "}
       <span className="amount-expense">{commafy(Number(expense.amount))}</span> for{" "}
       <span className="expense-name">{expense.name}</span>.
     </TextOutput>

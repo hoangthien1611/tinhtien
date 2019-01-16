@@ -1,0 +1,21 @@
+.listItemParticipant {
+  max-height: 245px;
+  overflow-y: auto;
+}
+
+.listParticipant .list-item {
+  padding: 7px 12px;
+}
+
+.slash {
+  padding: 0px 10px;
+}
+
+.select-all, .unselect-all {
+  text-decoration: underline;
+  font-size: 0.75rem;
+}
+
+.select-all:hover, .unselect-all:hover {
+  color: #325181;
+}

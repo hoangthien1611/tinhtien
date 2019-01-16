@@ -70,10 +70,9 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
       })
   }
 
-
-
   render() {
     const { expenses, loading, addable, persons, addingExpense, editingExpense, deletingExpense, focusExpense, deleteMessage } = this.state;
+    const { activityUrl } = this.props;
     return (
       <>
         <div>
@@ -93,7 +92,7 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
         </div>
         {addingExpense && (
           <ExpenseDialog
-            activityUrl={this.props.activityUrl}
+            activityUrl={activityUrl}
             people={persons}
             onSubmit={this.handleAddExpense}
             onClose={() => {
@@ -103,7 +102,7 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
         )}
         {editingExpense && focusExpense && (
           <ExpenseDialog
-            activityUrl={this.props.activityUrl}
+            activityUrl={activityUrl}
             people={persons}
             onSubmit={this.handleEditExpense}
             onClose={() => {
@@ -159,14 +158,16 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
   };
 
   private handleAddExpense = (
+    activityUrl: string,
     name: string,
     amount: number,
     personId: number,
     createdDate: Date,
+    participantIds: number[]
   ) => {
     this.toggleLoading();
     addExpense(
-      name, amount, personId, createdDate,
+      activityUrl, name, amount, personId, createdDate, participantIds,
       (expense: Expense) => {
         const newExpenses = this.addExpenseInLocal(this.state.expenses, expense)
         this.setState({ expenses: newExpenses });
@@ -180,15 +181,14 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
     );
   };
 
-  private handleEditExpense = (name: string, amount: number, personId: number, createdDate: Date, id?: number) => {
+  private handleEditExpense = (activityUrl: string, name: string, amount: number, personId: number, createdDate: Date, participantIds: number[], id?: number) => {
     if (!id) return;
     this.toggleLoading();
     editExpense(
-      id, name, amount, personId, createdDate,
+      activityUrl, id, name, amount, personId, participantIds, createdDate,
       (expense: Expense) => {
         const newExpenses = this.editExpenseInLocal(this.state.expenses, expense)
         if (newExpenses) { this.setState({ expenses: newExpenses }); }
-        console.log(expense);
       },
       (errorMessage: string) => {
         console.log(errorMessage);
@@ -221,7 +221,7 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
   onDeleteFailure = (deleteMessage: string) => {
     this.setState({
       deleteMessage,
-      deletingExpense: false
+      deletingExpense: false,
     });
     setTimeout(() => this.setState({ deleteMessage: undefined }), 3000);
   }

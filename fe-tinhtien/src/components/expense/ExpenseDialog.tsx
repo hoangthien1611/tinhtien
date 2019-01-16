@@ -15,16 +15,19 @@ import Expense from "../../models/Expense";
 import appConstant from "../../utils/appConstant";
 import { compareDateInYearMonthDay } from "../../utils/dateHelper";
 import { setStorage, getStorage } from "../../utils/localStorage";
+import ChooseParticipantInput from "./ChooseParticipantInput";
 
 export interface ExpenseDialogProps {
   activityUrl: string;
   people: Person[];
   onClose: () => void;
   onSubmit: (
+    activityUrl: string,
     name: string,
     amount: number,
-    personId: number,
+    payerId: number,
     createdDate: Date,
+    participantIds: number[],
     id?: number,
   ) => void;
   expense?: Expense;
@@ -32,12 +35,13 @@ export interface ExpenseDialogProps {
 }
 
 export interface ExpenseDialogState {
-  selectedPersonId: number;
+  selectedPayerId: number;
   name: string;
   amount: string;
   createdDate: Date;
   nameHasChanged: boolean;
   amountHasChanged: boolean;
+  participantIds: number[];
 }
 
 export default class ExpenseDialog extends React.Component<ExpenseDialogProps, ExpenseDialogState> {
@@ -46,32 +50,50 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
     const expense = props.expense;
     this.state = this.inEditMode() ?
       {
-        selectedPersonId: expense!.person.id,
+        selectedPayerId: expense!.payer.id,
         name: expense!.name,
         amount: expense!.amount.toString(),
         createdDate: new Date(expense!.date),
         nameHasChanged: false,
-        amountHasChanged: false
+        amountHasChanged: false,
+        participantIds: this.getListId(expense!.participants)
       } : {
-        selectedPersonId: this.getPersonIdByActivityUrl(),
+        selectedPayerId: this.getPayerIdByActivityUrl(),
         name: "",
         amount: "",
         createdDate: new Date(),
         nameHasChanged: false,
-        amountHasChanged: false
+        amountHasChanged: false,
+        participantIds: this.getListId(this.props.people)
       }
+  }
+
+  private handleChangeParticipantId = (participantIds: number[]) => {
+    this.setState({
+      participantIds: participantIds
+    });
+  }
+
+  private getListId(people?: Person[]): number[] {
+    if (people === undefined) {
+      return [];
+    } else {
+      return people.map(person => person.id);
+    }
   }
 
   private handleSubmit = () => {
     this.props.onSubmit(
+      this.props.activityUrl,
       this.state.name.trim(),
       Number(this.state.amount.trim()),
-      this.state.selectedPersonId,
+      this.state.selectedPayerId,
       this.state.createdDate,
+      this.state.participantIds,
       this.props.expense ? this.props.expense.id : undefined);
     this.props.onClose();
-    this.setState({ selectedPersonId: this.getPersonIdByActivityUrl() })
-    setStorage(this.props.activityUrl, this.state.selectedPersonId.toString());
+    this.setState({ selectedPayerId: this.getPayerIdByActivityUrl() })
+    setStorage(this.props.activityUrl, this.state.selectedPayerId.toString());
   };
 
   private handleDescriptionChange = (
@@ -113,15 +135,22 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
     return ValidateResult.Ok;
   }
 
+  private validateParticipantIds(participantIds: number[], selectedPayerId: number): ValidateResult {
+    if (participantIds.length < 1 || participantIds.length === 1 && participantIds.indexOf(selectedPayerId) > -1) {
+      return ValidateResult.AtLeastOnePersonNotPayer;
+    }
+    return ValidateResult.Ok;
+  }
+
   private handlePersonChange = (personId: string) => {
-    this.setState({ selectedPersonId: Number(personId) });
+    this.setState({ selectedPayerId: parseInt(personId) });
   };
 
   private handleDateChange = (value: Date) => {
     this.setState({ createdDate: value });
   };
 
-  private getPersonIdByActivityUrl(): number {
+  private getPayerIdByActivityUrl(): number {
     const personId = getStorage(this.props.activityUrl);
     if (personId != null) {
       return parseInt(personId);
@@ -136,24 +165,32 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
   private noChangeInEditMode(): boolean {
     if (!this.inEditMode()) return false;
     const { expense } = this.props;
-    const { amount, selectedPersonId, name, createdDate } = this.state;
+    const { amount, selectedPayerId, name, createdDate, participantIds } = this.state;
     return expense!.amount === Number(amount.trim()) && compareDateInYearMonthDay(expense!.date, createdDate) === 0
-      && expense!.name === name && expense!.person.id === selectedPersonId;
+      && expense!.name === name && expense!.payer.id === selectedPayerId
+      && this.updateParticipantIds(participantIds, expense!.participants!);
+  }
+
+  private updateParticipantIds(participantIds: number[], people: Person[], ): boolean {
+    if (people.length === participantIds.length) {
+      return true;
+    }
+    return JSON.stringify(people.map(person => person.id).sort()) === JSON.stringify(participantIds.sort());
   }
 
   render(): React.ReactNode {
     const validateDescriptionResult: ValidateResult = this.validateDescription(this.state.name);
     const validateAmountResult: ValidateResult = this.validateAmount(this.state.amount);
+    const validateParticipantIds: ValidateResult = this.validateParticipantIds(this.state.participantIds, this.state.selectedPayerId);
     const disableSubmitButton = this.noChangeInEditMode() || validateAmountResult !== ValidateResult.Ok ||
-      validateDescriptionResult !== ValidateResult.Ok;
+      validateDescriptionResult !== ValidateResult.Ok || validateParticipantIds !== ValidateResult.Ok;
     return (
-
       <ModalOverlay>
         <ActionContentbox
           headingElements={this.createDialogHeader()}
           footer={this.createDialogFooter(disableSubmitButton)}
         >
-          {this.createDialogContent(validateDescriptionResult, validateAmountResult)}
+          {this.createDialogContent(validateDescriptionResult, validateAmountResult, validateParticipantIds)}
         </ActionContentbox>
       </ModalOverlay>
     );
@@ -188,15 +225,15 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
     );
   }
 
-  private createDialogContent(validateDescriptionResult: ValidateResult, validateAmountResult: ValidateResult): React.ReactNode {
+  private createDialogContent(validateDescriptionResult: ValidateResult, validateAmountResult: ValidateResult, validateParticipantIdsResult: ValidateResult): React.ReactNode {
     const { people } = this.props;
-    const { selectedPersonId, name: description, amount, createdDate: date, nameHasChanged, amountHasChanged } = this.state;
+    const { selectedPayerId, name: description, amount, createdDate: date, participantIds, nameHasChanged, amountHasChanged } = this.state;
     return (
       <>
         <Select
           label={appConstant.intro.EXPENSE_PERSON}
           onValueChanged={this.handlePersonChange}
-          value={selectedPersonId.toString()}
+          value={selectedPayerId.toString()}
         >
           {people.map(person => (
             <Select.Item
@@ -222,6 +259,12 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
           value={amount}
           errorMessage={this.showErrorMessage(amountHasChanged, validateAmountResult)}
         />
+        {this.generateEmptyLine(validateParticipantIdsResult !== ValidateResult.Ok)}
+        <ChooseParticipantInput
+          participantIds={participantIds}
+          people={people}
+          selectedPayerId={selectedPayerId}
+          onChangeParticipantIds={this.handleChangeParticipantId} />
         {this.generateEmptyLine(false)}
         <DateInput onChange={this.handleDateChange} selectedDate={date} />
       </>

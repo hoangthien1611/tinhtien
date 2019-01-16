@@ -14,6 +14,7 @@ export default Object.freeze({
         EXPENSE_AMOUNT: "Amount of money:",
         EXPENSE_PERSON: "Paid by:",
         EXPENSE_ADD_NEW: "Add a new expense",
-        EXPENSE_EDIT: "Edit your expense"
+        EXPENSE_EDIT: "Edit your expense",
+        EXPENSE_PARTICIPANT: "Participants:"
     }
 });
