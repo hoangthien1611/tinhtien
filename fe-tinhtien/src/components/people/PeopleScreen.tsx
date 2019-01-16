@@ -16,6 +16,7 @@ interface PeopleScreenState {
     errorMessageEditInput?: string;
     loading: boolean;
     deleteMessage?: string;
+    typedInput: boolean;
 }
 
 interface PeopleScreenProps {
@@ -32,7 +33,8 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
             editingPersonIndex: undefined,
             errorMessageEditInput: undefined,
             loading: false,
-            deleteMessage: undefined
+            deleteMessage: undefined,
+            typedInput: false
         }
     }
 
@@ -56,7 +58,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     }
 
     render(): React.ReactNode {
-        let { persons, enteringName, editingPersonIndex, errorMessageEditInput, loading, deleteMessage } = this.state;
+        let { persons, enteringName, editingPersonIndex, errorMessageEditInput, loading, deleteMessage, typedInput } = this.state;
         enteringName = enteringName ? enteringName : "";
         return (
             <>
@@ -88,7 +90,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                 }
                 {
                     <>
-                        <div className="field__message" hidden={enteringName.length !== 0 && this.validateInput(enteringName) !== ""}>
+                        <div className="field__message" hidden={typedInput && this.validateInput(enteringName) !== ""}>
                             <div className="field__messageIcon"><i className="plasma-icon">_</i></div>
                             <div className="field__messageText"></div>
                         </div>
@@ -98,7 +100,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                             placeholder={appConstant.placeholder.ENTER_NAME}
                             onKeyDown={event => this.handleKeyDown(event.key)}
                             onFocus={this.handleFocusInput}
-                            errorMessage={enteringName.length !== 0 ? this.validateInput(enteringName) : ""}
+                            errorMessage={typedInput ? this.validateInput(enteringName) : ""}
                             rightButton={
                                 <Button title='Clear' style={{ width: "100%" }} icon={closeIcon} onClick={this.onClearButtonClick} />
                             }
@@ -229,7 +231,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     }
 
     handleChange = (value: string): void => {
-        this.setState({ enteringName: value })
+        this.setState({ enteringName: value, typedInput: true })
     }
 
     handleKeyDown(key: string): void {
@@ -249,6 +251,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                 this.setState({
                     persons: [...persons, newPerson],
                     enteringName: undefined,
+                    typedInput: false
                 });
                 this.toggleLoading();
                 if (this.inputRef) {

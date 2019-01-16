@@ -10,6 +10,7 @@ import {
 interface CreateActivityFormState {
   formValue: string;
   validateResult: string;
+  showButtonCreate: boolean
 }
 
 interface CreateActivityFormProps extends RouteComponentProps<any> { }
@@ -19,14 +20,19 @@ class CreateActivityForm extends React.Component<CreateActivityFormProps, Create
     super(props);
     this.state = {
       formValue: "",
-      validateResult: ValidActivityResult.EmptyError
+      validateResult: "",
+      showButtonCreate: false,
     }
   }
 
   private handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let inputValue = event.target.value;
     let checkValidResult = checkValidActivityName(inputValue.trim());
-    this.setState({ formValue: inputValue, validateResult: checkValidResult });
+    if (checkValidResult != "") {
+      this.setState({ formValue: inputValue, validateResult: checkValidResult, showButtonCreate: false });
+    } else {
+      this.setState({ formValue: inputValue, validateResult: checkValidResult, showButtonCreate: true });
+    }
   };
 
   private handleCreateActivity = () => {
@@ -63,7 +69,7 @@ class CreateActivityForm extends React.Component<CreateActivityFormProps, Create
           <Button
             label="Create your activity"
             className="center"
-            disabled={this.state.validateResult != ""}
+            disabled={!this.state.showButtonCreate}
             onClick={() => this.handleCreateActivity()}
           />
         </div>
