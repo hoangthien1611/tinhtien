@@ -9,6 +9,7 @@ interface PaymentItemProps {
 
 export const OutstandingPaymentItem: React.FunctionComponent<PaymentItemProps> = ({ outstandingPayment }: PaymentItemProps) => (
 	<List.Item
+		style={{ wordWrap: "break-word" }}
 		graphic={<Icon>payment</Icon>}
 		text={generateOutstandingText(outstandingPayment)}
 	/>

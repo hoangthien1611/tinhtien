@@ -30,6 +30,7 @@ export class PersonItem extends React.Component<PersonItemProps, PersonItemState
         return (
             <>
                 <List.Item
+                    style={{ wordWrap: "break-word" }}
                     text={person.name}
                     graphic={personIcon}
                     meta={

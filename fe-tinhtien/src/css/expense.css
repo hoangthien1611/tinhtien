@@ -14,6 +14,8 @@
 }
 .expense-name {
   color: green;
+  word-wrap: break-word;
+  white-space: pre-wrap;
 }
 .btn-add-expense {
   position: absolute;
