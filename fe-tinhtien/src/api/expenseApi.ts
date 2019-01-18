@@ -71,7 +71,7 @@ export const editExpense = (id: number, name: string, amount: number, personId: 
   )
 }
 export const deleteExpense = (id: number,
-  onSuccess: () => void,
+  onSuccess: (message: string) => void,
   onFailure: (errorMessage: string) => void
 ) => {
   deleteData(baseUrl + id)
@@ -79,7 +79,7 @@ export const deleteExpense = (id: number,
       jsonResult => {
         if (jsonResult.error) {
           onFailure(jsonResult.message);
-        } else onSuccess();
+        } else onSuccess(jsonResult.message);
       }
     )
 }
