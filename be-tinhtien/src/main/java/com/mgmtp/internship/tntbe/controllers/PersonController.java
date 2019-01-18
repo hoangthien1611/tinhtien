@@ -6,6 +6,8 @@ import com.mgmtp.internship.tntbe.services.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/person")
 public class PersonController {
@@ -14,17 +16,17 @@ public class PersonController {
     PersonService personService;
 
     @PostMapping("")
-    public Object saveNewPerson(@RequestBody PersonDTO personDTO) {
+    public Person saveNewPerson(@RequestBody PersonDTO personDTO) {
         return personService.saveNewPerson(personDTO);
     }
 
     @GetMapping("/{activityUrl}")
-    public Object getPersons(@PathVariable String activityUrl) {
+    public List<Person> getPersons(@PathVariable String activityUrl) {
         return personService.getPersons(activityUrl);
     }
 
     @PutMapping("")
-    public Object updatePerson(@RequestBody Person person) {
+    public Person updatePerson(@RequestBody Person person) {
         return personService.updatePerson(person);
     }
 

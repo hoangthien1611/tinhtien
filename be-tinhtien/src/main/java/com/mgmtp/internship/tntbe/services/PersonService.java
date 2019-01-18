@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,33 +27,52 @@ public class PersonService {
     @Autowired
     ExpenseRepository expenseRepository;
 
-    public Object saveNewPerson(PersonDTO personDTO) {
-        Activity activity = activityRepository.findByUrl(personDTO.getActivityUrl());
-        if (activity != null) {
-            return personRepository.save(new Person(personDTO.getName(), true, activity));
+    public Person saveNewPerson(PersonDTO personDTO) {
+        if (personDTO.getName() != null && personDTO.getActivityUrl() != null ) {
+            if (personDTO.getName().trim().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Person Name is empty");
+            } else if (personDTO.getActivityUrl().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Activity Url is empty");
+            } else {
+                Activity activity = activityRepository.findByUrl(personDTO.getActivityUrl());
+                if (activity !=null) {
+                    Person person = personRepository.findByNameAndActivity(personDTO.getName(), activity);
+                    if (person == null) {
+                        return personRepository.save(new Person(personDTO.getName(), true, activity));
+                    } else {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Person already existed in this activity");
+                    }
+                } else {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Activity doesn't exist");
+                }
+            }
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Null Pointer Exception");
         }
-        return new ErrorMessage("Activity doesn't exist");
     }
 
-    public Object getPersons(String activityUrl) {
+    public List<Person> getPersons(String activityUrl) {
         Activity activity = activityRepository.findByUrl(activityUrl);
         if (activity != null) {
             return activity.getPersons();
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Activity doesn't exist");
         }
-        return new ErrorMessage("Activity doesn't exist");
     }
 
-    public Object updatePerson(Person person) {
+    public Person updatePerson(Person person) {
         if (person != null) {
-            Person oldPerson = personRepository.findById(person.getId()).orElse(null);
-            if (oldPerson != null) {
+            Person oldPerson = personRepository.findById(person.getId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Person is not found!"));
+            Activity activity = oldPerson.getActivity();
+            if (personRepository.findByNameAndActivity(person.getName(), activity) == null) {
                 oldPerson.setName(person.getName());
                 return personRepository.save(oldPerson);
             } else {
-                return new ErrorMessage("Not found Person by id = " + person.getId());
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Person existed in this activity");
             }
         } else {
-            return new ErrorMessage("Null Object Exception");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Null Object Exception");
         }
     }
 
