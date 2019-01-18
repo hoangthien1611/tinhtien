@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     List<Expense> findAllByPersonInOrderByCreatedDateAsc(List<Person> people);
+
+    List<Expense> findAllByPerson_Id(long id);
 }

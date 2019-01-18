@@ -93,6 +93,7 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
         </div>
         {addingExpense && (
           <ExpenseDialog
+            activityUrl={this.props.activityUrl}
             people={persons}
             onSubmit={this.handleAddExpense}
             onClose={() => {
@@ -102,6 +103,7 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
         )}
         {editingExpense && focusExpense && (
           <ExpenseDialog
+            activityUrl={this.props.activityUrl}
             people={persons}
             onSubmit={this.handleEditExpense}
             onClose={() => {

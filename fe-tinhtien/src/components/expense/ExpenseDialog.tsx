@@ -14,8 +14,10 @@ import "../../css/expenseDialog.css";
 import Expense from "../../models/Expense";
 import appConstant from "../../utils/appConstant";
 import { compareDateInYearMonthDay } from "../../utils/dateHelper";
+import { setStorage, getStorage } from "../../utils/localStorage";
 
 export interface ExpenseDialogProps {
+  activityUrl: string;
   people: Person[];
   onClose: () => void;
   onSubmit: (
@@ -34,6 +36,8 @@ export interface ExpenseDialogState {
   name: string;
   amount: string;
   createdDate: Date;
+  nameHasChanged: boolean;
+  amountHasChanged: boolean;
 }
 
 export default class ExpenseDialog extends React.Component<ExpenseDialogProps, ExpenseDialogState> {
@@ -45,21 +49,17 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
         selectedPersonId: expense!.person.id,
         name: expense!.name,
         amount: expense!.amount.toString(),
-        createdDate: new Date(expense!.date)
+        createdDate: new Date(expense!.date),
+        nameHasChanged: false,
+        amountHasChanged: false
       } : {
-        selectedPersonId: this.getDefaultPersonId(),
+        selectedPersonId: this.getPersonIdByActivityUrl(),
         name: "",
         amount: "",
-        createdDate: new Date()
+        createdDate: new Date(),
+        nameHasChanged: false,
+        amountHasChanged: false
       }
-  }
-
-  private getDefaultPersonId(): number {
-    const { people, defaultName } = this.props;
-    for (const i in people) {
-      if (people[i].name === defaultName) return people[i].id;
-    }
-    return this.props.people[0].id;
   }
 
   private handleSubmit = () => {
@@ -70,13 +70,18 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
       this.state.createdDate,
       this.props.expense ? this.props.expense.id : undefined);
     this.props.onClose();
+    this.setState({ selectedPersonId: this.getPersonIdByActivityUrl() })
+    setStorage(this.props.activityUrl, this.state.selectedPersonId.toString());
   };
 
   private handleDescriptionChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     let description = event.target.value;
-    this.setState({ name: description });
+    this.setState({
+      name: description,
+      nameHasChanged: true
+    });
   };
 
   private validateDescription(description: string): ValidateResult {
@@ -89,7 +94,10 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
 
   private handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    this.setState({ amount: value });
+    this.setState({
+      amount: value,
+      amountHasChanged: true
+    });
   };
 
   private validateAmount(amount: string): ValidateResult {
@@ -112,6 +120,14 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
   private handleDateChange = (value: Date) => {
     this.setState({ createdDate: value });
   };
+
+  private getPersonIdByActivityUrl(): number {
+    const personId = getStorage(this.props.activityUrl);
+    if (personId != null) {
+      return parseInt(personId);
+    }
+    else return this.props.people[0].id;
+  }
 
   private inEditMode(): boolean {
     return typeof this.props.expense != 'undefined';
@@ -174,7 +190,7 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
 
   private createDialogContent(validateDescriptionResult: ValidateResult, validateAmountResult: ValidateResult): React.ReactNode {
     const { people } = this.props;
-    const { selectedPersonId, name: description, amount, createdDate: date } = this.state;
+    const { selectedPersonId, name: description, amount, createdDate: date, nameHasChanged, amountHasChanged } = this.state;
     return (
       <>
         <Select
@@ -190,21 +206,21 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
             />
           ))}
         </Select>
-        {this.generateEmptyLine(validateDescriptionResult !== ValidateResult.Ok)}
+        {this.generateEmptyLine(nameHasChanged && validateDescriptionResult !== ValidateResult.Ok)}
         <TextLineStateless
           label={appConstant.intro.EXPENSE_DESCRIPTION}
           placeholder={appConstant.placeholder.EXPENSE_DESCRIPTION}
           onChange={this.handleDescriptionChange}
           value={description}
-          errorMessage={validateDescriptionResult !== ValidateResult.Ok && validateDescriptionResult}
+          errorMessage={this.showErrorMessage(nameHasChanged, validateDescriptionResult)}
         />
-        {this.generateEmptyLine(validateAmountResult !== ValidateResult.Ok)}
+        {this.generateEmptyLine(amountHasChanged && validateAmountResult !== ValidateResult.Ok)}
         <TextLineStateless
           label={appConstant.intro.EXPENSE_AMOUNT}
           placeholder={appConstant.placeholder.EXPENSE_AMOUNT}
           onChange={this.handleAmountChange}
           value={amount}
-          errorMessage={validateAmountResult !== ValidateResult.Ok && validateAmountResult}
+          errorMessage={this.showErrorMessage(amountHasChanged, validateAmountResult)}
         />
         {this.generateEmptyLine(false)}
         <DateInput onChange={this.handleDateChange} selectedDate={date} />
@@ -219,5 +235,9 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
         <div className="field__messageText"></div>
       </div>
     )
+  }
+
+  private showErrorMessage(changed: boolean, validateResult: ValidateResult) {
+    return changed && (validateResult !== ValidateResult.Ok) && validateResult;
   }
 }
