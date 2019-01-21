@@ -170,7 +170,7 @@ export default class ChooseParticipantInput extends React.Component<
                 participantsInput.length !== 0
                   ? this.getListPerson(participantsInput)
                   : <List.Item text={
-                      <>No results</>
+                    <>No results</>
                   } />
               }
             </div>

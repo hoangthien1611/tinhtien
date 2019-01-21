@@ -39,7 +39,8 @@ public class PersonService {
                     if (person == null) {
                         return personRepository.save(new Person(personDTO.getName(), true, activity));
                     } else {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Person already existed in this activity");
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                "Person already existed in this activity");
                     }
                 } else {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Activity doesn't exist");
@@ -64,6 +65,8 @@ public class PersonService {
             Person oldPerson = personRepository.findById(person.getId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Person is not found!"));
             Activity activity = oldPerson.getActivity();
+            if (person.getName().toLowerCase().equals(oldPerson.getName().toLowerCase()))
+                return oldPerson;
             if (personRepository.findByNameIgnoreCaseAndActivity(person.getName(), activity) == null) {
                 oldPerson.setName(person.getName());
                 return personRepository.save(oldPerson);
@@ -83,9 +86,11 @@ public class PersonService {
         } else if (!optionalPerson.get().getActivity().getUrl().equals(personDTO.getActivityUrl())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This person is not existing in this activity!");
         } else if (!expenseRepository.findAllByPayer_Id(personDTO.getId()).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can not delete this person because he/she has paid for something!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Can not delete this person because he/she has paid for something!");
         } else if (!expenseRepository.findAllByParticipantsContains(optionalPerson.get()).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can not delete this person because he/she joined at least a expense!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Can not delete this person because he/she joined at least a expense!");
         } else {
             personRepository.delete(optionalPerson.get());
             return "{ \"message\": \"Delete person successfully!\" }";

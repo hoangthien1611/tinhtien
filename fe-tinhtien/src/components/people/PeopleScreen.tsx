@@ -1,5 +1,5 @@
 import React from 'react';
-import { List, TextLineStateless, Icon, Button, ProgressIndicator } from "@com.mgmtp.a12/widgets";
+import { List, TextLineStateless, Icon, Button, ProgressIndicator, ConnectedToast, Toast } from "@com.mgmtp.a12/widgets";
 import Person from "../../models/Person";
 import { PersonItem } from "./PersonItem";
 import { PersonItemInput } from "./PersonItemInput";
@@ -8,7 +8,7 @@ import scrollIntoView from 'scroll-into-view-if-needed';
 import { getData, addData, updateData, deleteData } from '../../utils/apiCaller';
 import { DeleteDialog } from '../dialog/DeleteDialog';
 import { Variant } from '../../utils/Variant';
-import { removeStorage, getStorage } from '../../utils/localStorage';
+import { setStorage, getStorage, removeStorage } from "../../utils/localStorage";
 
 const closeIcon = <Icon>close</Icon>;
 
@@ -20,6 +20,9 @@ interface PeopleScreenState {
     loading: boolean;
     commonErrorMessage?: string;
     typedInput: boolean;
+    deleteMessage?: string;
+    currentToast?: HTMLElement | null;
+    userGuideMessage?: string;
 }
 
 interface PeopleScreenProps {
@@ -28,7 +31,7 @@ interface PeopleScreenProps {
 
 export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScreenState> {
     _isMounted: boolean = false;
-    private inputRef: HTMLInputElement | null = null;
+    private inputRef: HTMLElement | null = null;
     constructor(props: PeopleScreenProps) {
         super(props);
         this.state = {
@@ -38,25 +41,35 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
             errorMessageEditInput: undefined,
             loading: false,
             commonErrorMessage: undefined,
-            typedInput: false
+            typedInput: false,
+            currentToast: undefined,
+            userGuideMessage: undefined,
         }
     }
 
     private showErrorDialog(errorMessage: string, withRefresh: boolean) {
-      if (withRefresh) this.loadData();
-      this.setState({ commonErrorMessage: errorMessage });
-      setTimeout(() => this.setState({ commonErrorMessage: undefined }), 2000);
+        if (withRefresh) this.loadData();
+        this.setState({ commonErrorMessage: errorMessage });
+        setTimeout(() => this.setState({ commonErrorMessage: undefined }), 2000);
     }
 
     async loadData(): Promise<void> {
-      this.toggleLoading();
-      await this.getListPerson(this.props.activityUrl);
-      this.toggleLoading();
+        this.toggleLoading();
+        await this.getListPerson(this.props.activityUrl);
+        this.toggleLoading();
     }
 
-    componentDidMount() {
+    async componentDidMount(): Promise<void> {
         this._isMounted = true;
-        this.loadData();
+        this.toggleLoading();
+        await this.getListPerson(this.props.activityUrl);
+        this.toggleLoading();
+        if (!getStorage("userGuide_PeopleTab")) {
+            this.setState({
+                userGuideMessage: appConstant.userGuide.people.ENTER_PERSON_NAME,
+                currentToast: this.inputRef
+            });
+        }
     }
 
     componentWillUnmount() {
@@ -74,12 +87,12 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                 });
             }
         } catch (error) {
-          this.showErrorDialog("There is something wrong with the server right now.", false);
+            this.showErrorDialog("There is something wrong with the server right now.", false);
         }
     }
 
     render(): React.ReactNode {
-        let { persons, enteringName, editingPersonIndex, errorMessageEditInput, loading, commonErrorMessage, typedInput } = this.state;
+        let { persons, enteringName, editingPersonIndex, errorMessageEditInput, loading, commonErrorMessage, typedInput, currentToast, userGuideMessage } = this.state;
         enteringName = enteringName ? enteringName : "";
         return (
             <>
@@ -95,26 +108,26 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                                             onApplyEditResult={this.onApplyEditResult}
                                             handleChangeEditInput={this.handleChangeEditInput}
                                             errorMessage={errorMessageEditInput}
-                                            key={person.id}
-                                        />
+                                            key={person.id} />
                                     }
                                     return <PersonItem
                                         person={person}
                                         key={person.id}
                                         onDelete={this.onDeletePerson}
-                                        onEdit={this.onEditPerson}
-                                    />
+                                        onEdit={this.onEditPerson} />
                                 })
                             }
                         </List >
                         : <div />
                 }
+
                 {
                     <>
                         <div className="field__message" hidden={typedInput && this.validateInput(enteringName) !== ""}>
                             <div className="field__messageIcon"><i className="plasma-icon">_</i></div>
                             <div className="field__messageText"></div>
                         </div>
+
                         <TextLineStateless
                             value={enteringName}
                             onChange={event => this.handleChange(event.target.value)}
@@ -125,21 +138,32 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                             rightButton={
                                 <Button title='Clear' style={{ width: "100%" }} icon={closeIcon} onClick={this.onClearButtonClick} />
                             }
-                            inputRef={instance => this.inputRef = instance}
-                        />
+                            inputRef={element => this.inputRef = element} />
+
                         <Button title='Save' label="Save" primary style={{ float: "right" }} disabled={this.validateInput(enteringName) !== ""} onClick={this.onSaveButtonClick} />
                     </>
                 }
+
                 {loading && <ProgressIndicator />}
 
                 {commonErrorMessage && <DeleteDialog
                     variant={commonErrorMessage.indexOf("successfully") > 0 ? Variant.succes : Variant.error}
                     title={"Notification"}
-                    message={commonErrorMessage}
-                />
+                    message={commonErrorMessage} />
                 }
-            </>);
-    }
+
+                {currentToast && userGuideMessage &&
+                    <ConnectedToast
+                        referenceElement={currentToast}
+                        message={userGuideMessage}
+                        onClose={this.handleToastClose}
+                        variant={Variant.info}
+                        duration={5000} />
+                }
+            </>
+        );
+    };
+
 
     closeModal = (): void => {
         this.setState({ commonErrorMessage: undefined })
@@ -158,6 +182,15 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
             editingPersonIndex: undefined,
             errorMessageEditInput: undefined
         })
+    }
+
+    handleToastClose = (): void => {
+        this.setState({
+            userGuideMessage: undefined
+        });
+        if (!getStorage("userGuide_PeopleTab")) {
+            setStorage("userGuide_PeopleTab", "True");
+        }
     }
 
     handleFocusInput = (): void => {
@@ -199,7 +232,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     private handleChangeEditInput = (value?: string): void => {
         const { editingPersonIndex, persons } = this.state;
         if (editingPersonIndex !== undefined) {
-            if (persons[editingPersonIndex].name === this.trimName(value ? value.toLowerCase() : "")) {
+            if (persons[editingPersonIndex].name.toLowerCase() === this.trimName(value ? value.toLowerCase() : "")) {
                 this.setState({
                     errorMessageEditInput: ""
                 })
@@ -233,9 +266,9 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
             const result = await deleteData('api/person', { id: person.id, activityUrl: this.props.activityUrl });
             this.toggleLoading();
             if (result.status) {
-              const loadData= !(result.message === "Can not delete this person because he/she has paid for something!"
-              || result.message === "Can not delete this person because he/she joined at least a expense!");
-              this.showErrorDialog(result.message, loadData);
+                const loadData = !(result.message === "Can not delete this person because he/she has paid for something!"
+                    || result.message === "Can not delete this person because he/she joined at least a expense!");
+                this.showErrorDialog(result.message, loadData);
             } else {
                 this.setState({
                     persons: this.state.persons.filter(p => p.id !== person.id),
@@ -255,7 +288,11 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     }
 
     handleChange = (value: string): void => {
-        this.setState({ enteringName: value, typedInput: true })
+        this.setState({
+            enteringName: value,
+            typedInput: true,
+            userGuideMessage: this.state.userGuideMessage ? undefined : undefined
+        });
     }
 
     handleKeyDown(key: string): void {
@@ -289,9 +326,21 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                     this.inputRef.focus();
                     scrollIntoView(this.inputRef, { behavior: 'smooth', scrollMode: 'if-needed' })
                 }
+                if (getStorage("userGuide_PeopleTab") === "True") {
+                    this.setState({
+                        userGuideMessage: appConstant.userGuide.people.ADD_MORE_OR_GO_TO_THE_EXPENSES_TAB,
+                        currentToast: this.inputRef
+                    })
+                }
+                setStorage("userGuide_PeopleTab", "Done");
+                if (this.inputRef) {
+                    this.inputRef.focus();
+                    scrollIntoView(this.inputRef, { behavior: 'smooth', scrollMode: 'if-needed' })
+                }
             } catch (error) {
                 console.log(error);
             }
+
         }
     }
 

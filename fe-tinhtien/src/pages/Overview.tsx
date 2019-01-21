@@ -83,7 +83,6 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
   }
 
   async componentDidUpdate() {
-
     const currentTab = this.props.match.params.tab;
     if ((currentTab != "people" && currentTab != "expenses" && currentTab != "balance" && currentTab != "outstanding" && currentTab != undefined)) {
       this.props.history.replace("/404");

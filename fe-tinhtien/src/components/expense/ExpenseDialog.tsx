@@ -33,6 +33,9 @@ export interface ExpenseDialogProps {
   ) => void;
   expense?: Expense;
   defaultName?: string;
+  addingExpense?: boolean;
+  addExpensesButtonRef?: HTMLElement | null;
+  userGuideMessage?: string;
 }
 
 export interface ExpenseDialogState {
@@ -83,9 +86,8 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
   private getListId(people?: Person[]): number[] {
     if (people === undefined) {
       return [];
-    } else {
-      return people.map(person => person.id);
     }
+    return people.map(person => person.id);
   }
 
   private handleSubmit = () => {
@@ -136,7 +138,7 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
     if (isNaN(amountNumber) || !trimedAmount.match(/^-?\d*(\.\d*)?$/))
       return ValidateResult.NotNumberError;
     if (amountNumber <= 0) return ValidateResult.ZeroOrNegativeError;
-    if(amountNumber > appConstant.number.EXPENSE_MAX_AMOUNT)
+    if (amountNumber > appConstant.number.EXPENSE_MAX_AMOUNT)
       return ValidateResult.GreaterThanError;
     if (!trimedAmount.match(/^\d*(\.\d{0,2})?$/))
       return ValidateResult.MoreThan2DecimalError;
@@ -214,6 +216,7 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
         >
           Ok
         </Button>
+
         <Button
           onClick={onClose}
           destructive
@@ -244,6 +247,7 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
             />
           ))}
         </Select>
+
         {this.generateEmptyLine(nameHasChanged && validateDescriptionResult !== ValidateResult.Ok)}
         <TextLineStateless
           label={appConstant.intro.EXPENSE_DESCRIPTION}
@@ -252,6 +256,7 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
           value={description}
           errorMessage={this.showErrorMessage(nameHasChanged, validateDescriptionResult)}
         />
+
         {this.generateEmptyLine(amountHasChanged && validateAmountResult !== ValidateResult.Ok)}
         <TextLineStateless
           label={appConstant.intro.EXPENSE_AMOUNT}
@@ -260,6 +265,7 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
           value={amount}
           errorMessage={this.showErrorMessage(amountHasChanged, validateAmountResult)}
         />
+
         {this.generateEmptyLine(validateParticipantIdsResult !== ValidateResult.Ok)}
         <ChooseParticipantInput
           participantIds={participantIds}

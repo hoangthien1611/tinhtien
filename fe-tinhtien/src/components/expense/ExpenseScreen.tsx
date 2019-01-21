@@ -5,7 +5,8 @@ import {
   List,
   Icon,
   Button,
-  ProgressIndicator
+  ProgressIndicator,
+  ConnectedToast
 } from "@com.mgmtp.a12/widgets";
 
 import { addExpense, getExpenses, editExpense, deleteExpense } from "../../api/expenseApi";
@@ -17,6 +18,8 @@ import { ExpenseItem } from "./ExpenseItem";
 import ExpenseDialog from "./ExpenseDialog";
 import { DeleteDialog } from "../dialog/DeleteDialog";
 import { Variant } from "../../utils/Variant";
+import { setStorage, getStorage } from "../../utils/localStorage";
+import appConstant from "../../utils/appConstant";
 
 export interface ExpenseScreenProps {
   title: string;
@@ -33,10 +36,14 @@ export interface ExpenseScreenState {
   focusExpense?: Expense;
   addable: boolean;
   errorMessage?: string;
+  userGuideMessage?: string;
+  currentToast?: HTMLElement | null;
 }
 
 export default class ExpenseScreen extends React.Component<ExpenseScreenProps, ExpenseScreenState> {
   _isMounted: boolean = false;
+  private addExpensesButtonRef: HTMLElement | null = null;
+  private listExpensesRef: HTMLElement | null = null;
   state: ExpenseScreenState = {
     expenses: [],
     persons: [],
@@ -46,6 +53,8 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
     deletingExpense: false,
     addable: false,
     errorMessage: undefined,
+    userGuideMessage: undefined,
+    currentToast: undefined
   };
 
   private showErrorDialog(errorMessage: string, withRefresh: boolean) {
@@ -54,7 +63,7 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
     setTimeout(() => this.setState({ errorMessage: undefined }), 2000);
   }
 
-  async loadData(): Promise<void>  {
+  async loadData(): Promise<void> {
     this.toggleLoading();
     getExpenses(
       this.props.activityUrl,
@@ -70,6 +79,12 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
         this.toggleLoading();
       }
     );
+    if (!getStorage("userGuide_ExpensesTab")) {
+      this.setState({
+        userGuideMessage: appConstant.userGuide.expenses.ADD_EXPENSE_TO_THIS_ACTIVITY,
+        currentToast: this.addExpensesButtonRef
+      });
+    }
 
     getPersons(this.props.activityUrl, (persons: Person[]) => {
       if (this._isMounted) {
@@ -79,7 +94,7 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
       (errorMessage: string = "There is something wrong with the server right now.") => {
         this.showErrorDialog(errorMessage, false);
       })
-      this.setState({ errorMessage: undefined });
+    this.setState({ errorMessage: undefined });
   }
 
   componentDidMount() {
@@ -92,11 +107,11 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
   }
 
   render() {
-    const { expenses, loading, addable, persons, addingExpense, editingExpense, deletingExpense, focusExpense, errorMessage } = this.state;
+    const { expenses, loading, addable, persons, addingExpense, editingExpense, deletingExpense, focusExpense, errorMessage, userGuideMessage, currentToast } = this.state;
     const { activityUrl } = this.props;
     return (
       <>
-        <div>
+        <div ref={element => this.listExpensesRef = element}>
           <List id="list-expense" divider border
             style={expenses.length === 0 ? { visibility: "hidden" } : { visibility: "visible" }}>
             {this.renderExpenses(expenses)}
@@ -110,8 +125,10 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
             primary
             icon={<Icon>add</Icon>}
             title="Add expense"
+            buttonRef={element => this.addExpensesButtonRef = element}
           />
         </div>
+
         {addingExpense && (
           <ExpenseDialog
             activityUrl={activityUrl}
@@ -120,8 +137,11 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
             onClose={() => {
               this.setState({ addingExpense: false });
             }}
+            addingExpense={true}
+            addExpensesButtonRef={this.addExpensesButtonRef}
           />
         )}
+
         {editingExpense && focusExpense && (
           <ExpenseDialog
             activityUrl={activityUrl}
@@ -133,6 +153,7 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
             expense={focusExpense}
           />
         )}
+
         {deletingExpense && focusExpense && (
           <DeleteDialog
             title={"Confirm delete"}
@@ -141,6 +162,7 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
             onClose={this.cancelDelete}
           />
         )}
+
         {errorMessage && (
           <DeleteDialog
             variant={errorMessage.indexOf("successfully") > 0 ? Variant.succes : Variant.error}
@@ -149,6 +171,17 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
           />
         )}
         {loading && <ProgressIndicator />}
+
+        {userGuideMessage && addable && currentToast &&
+          <ConnectedToast
+            referenceElement={currentToast}
+            message={userGuideMessage}
+            onClose={this.handleToastClose}
+            variant={Variant.info}
+            duration={5000}
+            orientation={currentToast === this.addExpensesButtonRef ? "top" : "bottom"}
+          />
+        }
       </>
     );
   }
@@ -160,6 +193,15 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
       );
     });
   };
+
+  private handleToastClose = () => {
+    this.setState({
+      userGuideMessage: undefined
+    });
+    if (!getStorage("userGuide_ExpensesTab")) {
+      setStorage("userGuide_ExpensesTab", "True");
+    }
+  }
 
   private onClickAddButton = () => {
     this.setState({ addingExpense: true });
@@ -203,8 +245,20 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
       },
       () => {
         this.toggleLoading();
+        if (getStorage("userGuide_ExpensesTab") === "True") {
+          this.setState({
+            userGuideMessage: appConstant.userGuide.expenses.ADD_MORE_OR_GO_TO_THE_EXPENSES_TAB,
+            currentToast: this.listExpensesRef
+          })
+          setStorage("userGuide_ExpensesTab", "Done");
+        } else if (getStorage("userGuide_ExpensesTab") === "Done") {
+          this.setState({
+            currentToast: undefined
+          })
+        }
       }
     );
+
   };
 
   private handleEditExpense = (activityUrl: string, name: string, amount: number, personId: number, createdDate: Date, participantIds: number[], id?: number) => {
