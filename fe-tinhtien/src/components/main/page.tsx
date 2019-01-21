@@ -21,6 +21,7 @@ const { Row } = SizeContainerElements;
 interface MainPageState {
   showForm: boolean;
   descriptionData: AppDescription;
+  descriptionInterval: any;
 }
 
 export default class MainPage extends React.Component<{}, MainPageState> {
@@ -28,9 +29,13 @@ export default class MainPage extends React.Component<{}, MainPageState> {
     super(props);
     this.state = {
       showForm: false,
-      descriptionData: data[0]
+      descriptionData: data[0],
+      descriptionInterval: setInterval(this.nextDescription, 5000),
     };
-    setInterval(this.nextDescription, 5000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.state.descriptionInterval);
   }
 
   private showForm = () => {

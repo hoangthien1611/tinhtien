@@ -25,7 +25,6 @@ export function setStorage(key: string, value: string) {
         console.log('setStorage: Error setting key [' + key + '] in localStorage');
         return false;
     }
-    console.log(value);
     return true;
 }
 

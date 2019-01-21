@@ -14,6 +14,7 @@ interface BalanceScreenProps {
 }
 
 export default class BalanceScreen extends React.Component<BalanceScreenProps, BalanceScreenState> {
+  _isMounted:boolean = false;
 	constructor(props: BalanceScreenProps) {
 		super(props);
 		this.state = {
@@ -22,12 +23,19 @@ export default class BalanceScreen extends React.Component<BalanceScreenProps, B
 	}
 
 	async componentDidMount(): Promise<void> {
+    this._isMounted = true;
 		getBalance(this.props.activityUrl,
 			(balances: Balance[]) => {
-				this.setState({ balances })
+				if (this._isMounted) {
+          this.setState({ balances })
+        }
 			},
 			message => console.log(message))
-	}
+  }
+  
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
 
 	render(): React.ReactElement<{}> {
 		const totalExpense = this.state.balances
@@ -36,7 +44,7 @@ export default class BalanceScreen extends React.Component<BalanceScreenProps, B
 		const averageExpense = this.state.balances.length > 0 ? totalExpense / this.state.balances.length : 0;
 		return (
 			<div>
-				<div style={{ display: "inline-block", textAlign: "left", float: "left", marginLeft: 15 }}>
+				<div style={{ display: "inline-block", textAlign: "left", float: "left", marginLeft: 15, paddingTop: 10 }}>
 					<Label
 						style={{ fontSize: 14 }}
 						label={"Total Expense"}
@@ -46,7 +54,7 @@ export default class BalanceScreen extends React.Component<BalanceScreenProps, B
 						label={formatToCurrency(totalExpense)}
 					/>
 				</div>
-				<div style={{ display: "inline-block", textAlign: "right", float: "right", marginRight: 15 }}>
+				<div style={{ display: "inline-block", textAlign: "right", float: "right", marginRight: 15, paddingTop: 10 }}>
 					<Label
 						style={{ fontSize: 14 }}
 						label={"Average Expense"}

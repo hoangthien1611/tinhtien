@@ -5,22 +5,24 @@ import {
   ApplicationHeader,
   FlyoutMenu
 } from "@com.mgmtp.a12/widgets";
-import { RouteComponentProps } from "react-router-dom";
+import { RouteComponentProps, Route } from "react-router-dom";
 import { PeopleScreen } from "../components/people/PeopleScreen";
 import ExpenseScreen from "../components/expense/ExpenseScreen";
 import OutstandingPayMentScreen from "../components/outstandingpayment/OutStandingPaymentScreen";
 import minorLogo from "../images/minor_logo.png";
 import BalanceScreen from "../components/balance/BalanceScreen";
+import "../css/overview.css"
 
 const menuItems = [
-  { label: "People" },
-  { label: "Expenses" },
-  { label: "Balance" },
-  { label: "Outstanding" }
+  { label: "people" },
+  { label: "expenses" },
+  { label: "balance" },
+  { label: "outstanding" }
 ];
 
 interface OverviewState {
   activeMenu: string;
+  lastActiveMenu: string;
   activityName: string;
   activityUrl: string;
 }
@@ -28,24 +30,84 @@ interface OverviewState {
 interface OverviewProps extends RouteComponentProps<any> { }
 
 export default class Overview extends React.Component<OverviewProps, OverviewState> {
+  _isMounted: boolean = false;
   constructor(props: OverviewProps) {
     super(props);
 
     this.state = {
-      activeMenu: "People",
+      activeMenu: this.props.match.params.tab === undefined ? "people" : this.props.match.params.tab,
+      lastActiveMenu: "",
       activityName: "",
       activityUrl: this.props.match.params.code,
     }
   }
 
   async componentDidMount(): Promise<void> {
+    this._isMounted = true;
     const activityUrl = this.props.match.params.code;
     await this.getActivityName(activityUrl);
     document.title = this.state.activityName + " - tinhtien.org";
-    if (this.props.history.action === "POP") {
+  }
+
+  async componentWillMount() {
+    if (this.props.match.params.tab === undefined) {
+      if (this.props.history.action === "POP") {
+        this.props.history.replace("/activity/" + this.props.match.params.code + "/expenses");
+        this.setState({
+          activeMenu: "expenses",
+          lastActiveMenu: "expenses",
+        })
+      }
+      else {
+        const activityUrl = this.props.match.params.code;
+        await this.getActivityName(activityUrl);
+      }
+    }
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  componentWillReceiveProps() {
+    if (this._isMounted) {
       this.setState({
-        activeMenu: "Expenses"
-      });
+        lastActiveMenu: this.props.match.params.tab,
+      })
+    }
+  }
+
+  async componentDidUpdate() {
+    
+    const currentTab = this.props.match.params.tab;
+    if ((currentTab != "people" && currentTab != "expenses" && currentTab != "balance" && currentTab != "outstanding" && currentTab != undefined)) {
+      this.props.history.replace("/404");
+    }
+    //lastActiveMenu will be updated first in componentWillReceiveProps before activeMenu
+    //so lastActiveMenu === activeMenu means the menu had been changed.
+    if (this.state.lastActiveMenu === this.state.activeMenu) {
+      console.log(this.state.lastActiveMenu);
+      await this.getActivityName(this.props.match.params.code);
+      if (this._isMounted) {
+        this.setState({
+          activeMenu: this.props.match.params.tab,
+        })
+      }
+    }
+    if (this.props.match.params.tab === undefined) {
+      const activityUrl = this.props.match.params.code;
+      if (this.props.history.action === "POP") {
+        this.props.history.replace("/activity/" + this.props.match.params.code + "/expenses");
+        if (this._isMounted) {
+          this.setState({
+            activeMenu: "expenses",
+            lastActiveMenu: "expenses",
+          })
+        }
+      }
+      else if (this.state.activityName === "") {
+        await this.getActivityName(activityUrl);
+      }
     }
   }
 
@@ -54,9 +116,14 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
       const url: string = "api/activity/" + activityUrl;
       const result = await fetch(url);
       const activity = await result.json();
-      this.setState({
-        activityName: activity.name
-      });
+      if (activity.error) {
+        this.props.history.replace("/404");
+      }
+      if (this._isMounted) {
+        this.setState({
+          activityName: activity.name,
+        });
+      }
     } catch (error) {
       console.log(error);
     }
@@ -66,29 +133,45 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
     return menuItems.map((item) => ({
       ...item,
       selected: this.state.activeMenu === item.label,
-      onClick: () => this.setState({ activeMenu: item.label })
+      onClick: () => {
+        if (item.label != this.props.match.params.tab) {
+          this.setState({ activeMenu: item.label });
+          const goToLink = "/activity/" + this.props.match.params.code + "/" + item.label;
+          this.props.history.push(goToLink);
+        }
+      }
     }));
   }
 
-  private renderSwitch(activityUrl: string, activeMenu: string) {
-    switch (activeMenu) {
-      case "People":
+  private renderTab(activityUrl: string) {
+    const parentLink = this.props.match.url.substring(0, this.props.match.url.lastIndexOf("/"));
+    const currentTab = this.props.match.params.tab;
+    if (currentTab === undefined) {
+      if (this.props.history.action === "POP") {
+        return <Route path={parentLink + "/expenses"} render={props => <ExpenseScreen title="expenses" activityUrl={activityUrl} {...props} />} />
+      }
+      else {
         return <PeopleScreen activityUrl={activityUrl} />
-      case "Balance":
-        return <BalanceScreen activityUrl={activityUrl} />
-      case "Outstanding":
-        return <OutstandingPayMentScreen activityUrl={activityUrl} />
-      default:
-        return <ExpenseScreen title="Expenses" activityUrl={activityUrl} />
+      }
+    }
+    else {
+      return (
+        <div>
+          <Route path={parentLink + "/people"} render={props => <PeopleScreen activityUrl={activityUrl} {...props} />} />
+          <Route path={parentLink + "/expenses"} render={props => <ExpenseScreen title="expenses" activityUrl={activityUrl} {...props} />} />
+          <Route path={parentLink + "/balance"} render={props => <BalanceScreen activityUrl={activityUrl} {...props} />} />
+          <Route path={parentLink + "/outstanding"} render={props => <OutstandingPayMentScreen activityUrl={activityUrl} {...props} />} />
+        </div>
+      );
     }
   }
-  private shortenActivityName(activityName: string) {
-    let maximumLength = 40;
-    if (activityName.length <= maximumLength) {
+
+  private shortenActivityName(activityName: string, maximumLength: number) {
+    if (activityName.length < maximumLength) {
       return activityName;
     }
     for (let i = maximumLength; i > 1; i--) {
-      if (activityName[i] === " ") {
+      if (activityName.charAt(i) === " ") {
         return activityName.substring(0, i) + " ...";
       }
     }
@@ -96,7 +179,7 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
   }
 
   render(): React.ReactNode {
-    const { activityName, activeMenu, activityUrl } = this.state;
+    const { activityUrl, activityName } = this.state;
 
     return (
       <div>
@@ -110,13 +193,18 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
                   </a>,
                   <p>TinhTien</p>
                 ]}
-                rightSlots={this.shortenActivityName(activityName)} />
+                rightSlots={
+                  <div id="rightSlot">
+                    {this.shortenActivityName(activityName, window.innerWidth >= 800 ? 45 : window.innerWidth / 20 + 5)}
+                    {/* Magic numbers, work best with screen width range from 300 to infinite, since the whole form caps at 800px */}
+                  </div>
+                } />
               <FlyoutMenu type="horizontal" items={this.getMenuItems()} />
             </div>
           }
           sub={undefined}
           content={
-            this.renderSwitch(activityUrl, activeMenu)
+            this.renderTab(activityUrl)
           }
         />
       </div>

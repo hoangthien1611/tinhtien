@@ -36,6 +36,7 @@ export interface ExpenseScreenState {
 }
 
 export default class ExpenseScreen extends React.Component<ExpenseScreenProps, ExpenseScreenState> {
+  _isMounted:boolean = false;
   state: ExpenseScreenState = {
     expenses: [],
     persons: [],
@@ -48,11 +49,14 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
   };
 
   async componentDidMount(): Promise<void> {
+    this._isMounted = true;
     this.toggleLoading();
     getExpenses(
       this.props.activityUrl,
       (expenses: Expense[]) => {
-        this.setState({ expenses });
+        if (this._isMounted) {
+          this.setState({ expenses });
+        }
       },
       (errorMessage: string) => {
         console.log(errorMessage);
@@ -63,11 +67,17 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
     );
 
     getPersons(this.props.activityUrl, (persons: Person[]) => {
-      this.setState({ persons, addable: persons.length > 0 });
+      if (this._isMounted) {
+        this.setState({ persons, addable: persons.length > 0 });
+      }
     },
       (errorMessage: string) => {
         console.log(errorMessage);
       })
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   render() {
@@ -152,9 +162,11 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
   }
 
   private toggleLoading = (): void => {
-    this.setState({
-      loading: !this.state.loading
-    });
+    if (this._isMounted) {
+      this.setState({
+        loading: !this.state.loading
+      });
+    }
   };
 
   private handleAddExpense = (
@@ -170,7 +182,9 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
       activityUrl, name, amount, personId, createdDate, participantIds,
       (expense: Expense) => {
         const newExpenses = this.addExpenseInLocal(this.state.expenses, expense)
-        this.setState({ expenses: newExpenses });
+        if (this._isMounted) {
+          this.setState({ expenses: newExpenses });
+        }
       },
       (errorMessage: string) => {
         console.log(errorMessage);
