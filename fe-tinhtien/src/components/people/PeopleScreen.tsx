@@ -17,7 +17,7 @@ interface PeopleScreenState {
     editingPersonIndex?: number;
     errorMessageEditInput?: string;
     loading: boolean;
-    deleteMessage?: string;
+    commonErrorMessage?: string;
     typedInput: boolean;
 }
 
@@ -35,7 +35,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
             editingPersonIndex: undefined,
             errorMessageEditInput: undefined,
             loading: false,
-            deleteMessage: undefined,
+            commonErrorMessage: undefined,
             typedInput: false
         }
     }
@@ -60,7 +60,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     }
 
     render(): React.ReactNode {
-        let { persons, enteringName, editingPersonIndex, errorMessageEditInput, loading, deleteMessage, typedInput } = this.state;
+        let { persons, enteringName, editingPersonIndex, errorMessageEditInput, loading, commonErrorMessage, typedInput } = this.state;
         enteringName = enteringName ? enteringName : "";
         return (
             <>
@@ -113,10 +113,10 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                 }
                 {loading && <ProgressIndicator />}
 
-                {deleteMessage && <DeleteDialog
-                    variant={deleteMessage.indexOf("successfully") > 0 ? Variant.succes : Variant.error}
+                {commonErrorMessage && <DeleteDialog
+                    variant={commonErrorMessage.indexOf("successfully") > 0 ? Variant.succes : Variant.error}
                     title={"Notification"}
-                    message={deleteMessage}
+                    message={commonErrorMessage}
                 />
                 }
 
@@ -126,7 +126,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     };
 
     closeModal = (): void => {
-        this.setState({ deleteMessage: undefined })
+        this.setState({ commonErrorMessage: undefined })
     }
 
     toggleLoading = (): void => {
@@ -150,24 +150,32 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
 
     onApplyEditResult = async (person: Person, newName: string): Promise<void> => {
         try {
-            const { persons } = this.state;
-            const personsEdited = persons.map(p => {
-                if (p.name === person.name) {
-                    p.name = newName
-                }
-                return p;
-            })
-            this.setState({
-                editingPersonIndex: undefined,
-                errorMessageEditInput: undefined,
-                persons: personsEdited
-
-            })
-            await updateData('api/person', { name: this.trimName((newName).trim()), id: person.id });
+            this.toggleLoading();
+            const result = await updateData('api/person', { name: this.trimName((newName).trim()), id: person.id });
+            if (result.status) {
+                this.setState({
+                    commonErrorMessage: result.message,
+                    typedInput: false
+                });
+                setTimeout(() => this.setState({ commonErrorMessage: undefined }), 3000);
+            } else {
+                const { persons } = this.state;
+                const personsEdited = persons.map(p => {
+                    if (p.name === person.name) {
+                        p.name = newName
+                    }
+                    return p;
+                })
+                this.setState({
+                    editingPersonIndex: undefined,
+                    errorMessageEditInput: undefined,
+                    persons: personsEdited
+                })
+            }
+            this.toggleLoading();
         } catch (error) {
             console.log(error);
         }
-
     }
 
     private handleChangeEditInput = (value?: string): void => {
@@ -204,15 +212,14 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
             this.toggleLoading();
             if (result.status) {
                 this.setState({
-                    deleteMessage: result.message
+                    commonErrorMessage: result.message
                 });
-                setTimeout(() => this.setState({ deleteMessage: undefined }), 3000);
+                setTimeout(() => this.setState({ commonErrorMessage: undefined }), 3000);
             } else {
                 this.setState({
                     persons: this.state.persons.filter(p => p.id !== person.id),
-                    deleteMessage: result.message
+                    commonErrorMessage: result.message
                 });
-                setTimeout(() => this.setState({ deleteMessage: undefined }), 1000);
             }
         } catch (error) {
             console.log(error);
@@ -244,12 +251,20 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
         if (this.validateInput(enteringName) === "") {
             try {
                 this.toggleLoading();
-                const newPerson = await addData('api/person', { name: this.trimName((enteringName || "").trim()), activityUrl }) as Person;
-                this.setState({
-                    persons: [...persons, newPerson],
-                    enteringName: undefined,
-                    typedInput: false
-                });
+                const result = await addData('api/person', { name: this.trimName((enteringName || "").trim()), activityUrl });
+                if (result.status) {
+                    this.setState({
+                        commonErrorMessage: result.message,
+                        typedInput: false
+                    });
+                    setTimeout(() => this.setState({ commonErrorMessage: undefined }), 3000);
+                } else {
+                    this.setState({
+                        persons: [...persons, result],
+                        enteringName: undefined,
+                        typedInput: false
+                    });
+                }
                 this.toggleLoading();
                 if (this.inputRef) {
                     this.inputRef.focus();
