@@ -5,8 +5,7 @@ import {
   List,
   Icon,
   Button,
-  ProgressIndicator,
-  ModalNotification
+  ProgressIndicator
 } from "@com.mgmtp.a12/widgets";
 
 import { addExpense, getExpenses, editExpense, deleteExpense } from "../../api/expenseApi";
@@ -16,7 +15,8 @@ import { getPersons } from "../../api/personApi";
 import { compareDateInYearMonthDay } from "../../utils/dateHelper";
 import { ExpenseItem } from "./ExpenseItem";
 import ExpenseDialog from "./ExpenseDialog";
-import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
+import { DeleteDialog } from "../dialog/DeleteDialog";
+import { Variant } from "../../utils/Variant";
 
 export interface ExpenseScreenProps {
   title: string;
@@ -32,7 +32,7 @@ export interface ExpenseScreenState {
   deletingExpense: boolean;
   focusExpense?: Expense;
   addable: boolean;
-  showSuccessfulNotification: boolean
+  deleteMessage?: string
 }
 
 export default class ExpenseScreen extends React.Component<ExpenseScreenProps, ExpenseScreenState> {
@@ -44,7 +44,7 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
     editingExpense: false,
     deletingExpense: false,
     addable: false,
-    showSuccessfulNotification: false
+    deleteMessage: undefined
   };
 
   async componentDidMount(): Promise<void> {
@@ -73,7 +73,7 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
 
 
   render() {
-    const { expenses, loading, addable, persons, addingExpense, editingExpense, deletingExpense, focusExpense, showSuccessfulNotification } = this.state;
+    const { expenses, loading, addable, persons, addingExpense, editingExpense, deletingExpense, focusExpense, deleteMessage } = this.state;
     return (
       <>
         <div>
@@ -113,20 +113,19 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
           />
         )}
         {deletingExpense && focusExpense && (
-          <ConfirmDeleteDialog
+          <DeleteDialog
+            title={"Confirm delete"}
+            message={"Are you sure that you want to delete this expense?"}
             onSubmit={this.handleDeleteExpense}
-            onClose={() => {
-              this.setState({ deletingExpense: false, focusExpense: undefined })
-            }}
+            onClose={this.cancelDelete}
           />
         )}
-        {showSuccessfulNotification && (
-          <ModalNotification
-            variant="success"
-            title="Notification"
-          >
-            Deleted successfully
-          </ModalNotification>
+        {deleteMessage && (
+          <DeleteDialog
+            variant={deleteMessage.indexOf("successfully") > 0 ? Variant.succes : Variant.error}
+            title={"Notification"}
+            message={deleteMessage}
+          />
         )}
         {loading && <ProgressIndicator />}
       </>
@@ -203,23 +202,35 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
   private handleDeleteExpense = () => {
     const id = this.state.focusExpense ? this.state.focusExpense.id : undefined;
     if (!id) return;
-    deleteExpense(id,
-      () => {
-        this.setState({ deletingExpense: false, showSuccessfulNotification: true });
-        setTimeout(() => { this.setState({ showSuccessfulNotification: false }) }, 1000)
-      },
-      (errorMessage: String) => {
-        this.setState({ deletingExpense: false });
-        console.log(errorMessage);
-      }
+    deleteExpense(
+      id,
+      this.onDeleteSuccessfully,
+      this.onDeleteFailure
     );
+  }
+
+  onDeleteSuccessfully = (deleteMessage: string) => {
     this.setState({
-      expenses: this.state.expenses.filter(p => p.id !== (this.state.focusExpense ? this.state.focusExpense.id : 0)),
+      deleteMessage,
       deletingExpense: false,
-      showSuccessfulNotification: true
-
+      expenses: this.state.expenses.filter(expense => expense.id !== this.state.focusExpense!.id)
     });
+    setTimeout(() => this.setState({ deleteMessage: undefined }), 1000);
+  }
 
+  onDeleteFailure = (deleteMessage: string) => {
+    this.setState({
+      deleteMessage,
+      deletingExpense: false
+    });
+    setTimeout(() => this.setState({ deleteMessage: undefined }), 3000);
+  }
+
+  cancelDelete = () => {
+    this.setState({
+      deletingExpense: false,
+      focusExpense: undefined
+    });
   }
 
   private addExpenseInLocal(originExpenses: Expense[], addExpense: Expense) {

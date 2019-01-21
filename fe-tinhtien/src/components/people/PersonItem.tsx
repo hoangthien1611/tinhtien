@@ -1,6 +1,7 @@
 import React from 'react';
-import { List, Icon, Button, Dialog, ModalOverlay, ActionContentbox, ContentBoxElements, ModalNotification } from "@com.mgmtp.a12/widgets";
+import { List, Icon, Button } from "@com.mgmtp.a12/widgets";
 import Person from '../../models/Person';
+import { DeleteDialog } from '../dialog/DeleteDialog';
 const personIcon = <Icon>person</Icon>;
 const deleteIcon = <Icon>delete</Icon>;
 const editIcon = <Icon>edit</Icon>;
@@ -25,7 +26,7 @@ export class PersonItem extends React.Component<PersonItemProps, PersonItemState
     }
 
     render(): React.ReactNode {
-        const { person, onDelete } = this.props;
+        const { person } = this.props;
         return (
             <>
                 <List.Item
@@ -48,18 +49,12 @@ export class PersonItem extends React.Component<PersonItemProps, PersonItemState
                         </>
                     }
                 />
-                {this.state.isOpenDialog && <ModalNotification
+                {this.state.isOpenDialog && <DeleteDialog
+                    title={"Confirm delete"}
+                    message={"Are you sure that you want to delete this person from activity?"}
+                    onSubmit={this.confirmDelete}
                     onClose={this.closeModal}
-                    title="Delete"
-                    footer={
-                        <div style={{ textAlign: "right" }}>
-                            <Button primary destructive onClick={this.closeModal} label="Cancel" style={{ margin: '0 10px' }} />
-                            <Button primary onClick={this.confirmDelete} label="OK" />
-                        </div>
-                    }
-                >
-                    Do you want to delete <strong> {person.name} </strong> from activity ?
-                </ModalNotification>
+                />
                 }
             </>
         );

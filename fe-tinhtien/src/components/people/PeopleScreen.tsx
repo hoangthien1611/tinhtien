@@ -1,11 +1,13 @@
 import React from 'react';
-import { List, TextLineStateless, Icon, Button, ProgressIndicator, ModalNotification } from "@com.mgmtp.a12/widgets";
+import { List, TextLineStateless, Icon, Button, ProgressIndicator } from "@com.mgmtp.a12/widgets";
 import Person from "../../models/Person";
 import { PersonItem } from "./PersonItem";
 import { PersonItemInput } from "./PersonItemInput";
 import appConstant from '../../utils/appConstant';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { getData, addData, updateData, deleteData } from '../../utils/apiCaller';
+import { DeleteDialog } from '../dialog/DeleteDialog';
+import { Variant } from '../../utils/Variant';
 
 const closeIcon = <Icon>close</Icon>;
 
@@ -111,18 +113,11 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                 }
                 {loading && <ProgressIndicator />}
 
-                {deleteMessage && <ModalNotification
-                    variant={deleteMessage.indexOf("successfully") > 0 ? "success" : "error"}
-                    onClose={this.closeModal}
-                    title={"Delete"}
-                    footer={
-                        <div style={{ textAlign: "right" }}>
-                            <Button primary destructive onClick={this.closeModal} label="Close" />
-                        </div>
-                    }
-                >
-                    {deleteMessage}
-                </ModalNotification>
+                {deleteMessage && <DeleteDialog
+                    variant={deleteMessage.indexOf("successfully") > 0 ? Variant.succes : Variant.error}
+                    title={"Notification"}
+                    message={deleteMessage}
+                />
                 }
 
             </>
@@ -211,11 +206,13 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                 this.setState({
                     deleteMessage: result.message
                 });
+                setTimeout(() => this.setState({ deleteMessage: undefined }), 3000);
             } else {
                 this.setState({
                     persons: this.state.persons.filter(p => p.id !== person.id),
                     deleteMessage: result.message
                 });
+                setTimeout(() => this.setState({ deleteMessage: undefined }), 1000);
             }
         } catch (error) {
             console.log(error);
