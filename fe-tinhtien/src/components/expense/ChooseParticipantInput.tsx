@@ -11,6 +11,7 @@ import { ValidateResult } from "./ValidateResult";
 import Person from "../../models/Person";
 import appConstant from "../../utils/appConstant";
 import "../../css/chooseParticipantInput.css";
+import { getValidateResult } from "../../utils/validateResult";
 
 interface ChooseParticipantInputProps {
   selectedPayerId: number;
@@ -33,7 +34,7 @@ export default class ChooseParticipantInput extends React.Component<
   constructor(props: ChooseParticipantInputProps) {
     super(props);
     this.state = {
-      validateResult: this.getValidateResult(this.props.participantIds, this.props.selectedPayerId),
+      validateResult: getValidateResult(this.props.participantIds, this.props.selectedPayerId),
       selectAllParticipant: this.props.participantIds.length === this.props.people.length ? "all" : "another",
       nameParticipantInput: "",
       participantsInput: props.people
@@ -42,32 +43,30 @@ export default class ChooseParticipantInput extends React.Component<
   private getListPerson = (people: Person[]): React.ReactNode => {
     return people.map(person => {
       return (
-        <List.Item key={person.id} text={
-          <Checkbox
-            checked={this.props.participantIds.indexOf(person.id) > -1}
-            onChange={checked => this.handleChangeCheckboxIdPerson(checked, person.id)}
-            label={person.name} />
-        } />
+        <List.Item
+          key={person.id}
+          text={
+            <Checkbox
+              checked={this.props.participantIds.indexOf(person.id) > -1}
+              onChange={() => this.handleChangeCheckboxIdPerson(person.id)}
+              label={person.name} />
+          }
+          onClick={() => this.handleChangeCheckboxIdPerson(person.id)}
+        />
       );
     })
   }
 
-  private handleChangeCheckboxIdPerson(checked: boolean, idPerson: number): void {
+  private handleChangeCheckboxIdPerson(idPerson: number): void {
     const { participantIds } = this.props;
     const { selectedPayerId } = this.props;
-    let validateResult = ValidateResult.Ok;
-    if (checked && participantIds.indexOf(idPerson) == -1) {
+    if (participantIds.indexOf(idPerson) == -1) {
       participantIds.push(idPerson);
-    }
-    if (!checked && participantIds.indexOf(idPerson) > -1) {
+    } else {
       participantIds.splice(participantIds.indexOf(idPerson), 1);
     }
-    if (participantIds.length == 1 && participantIds.indexOf(selectedPayerId) > -1 ||
-      participantIds.length == 0) {
-      validateResult = ValidateResult.AtLeastOnePersonNotPayer;
-    }
     this.setState({
-      validateResult: validateResult
+      validateResult: getValidateResult(participantIds, selectedPayerId)
     });
     this.props.onChangeParticipantIds(participantIds);
   }
@@ -76,7 +75,7 @@ export default class ChooseParticipantInput extends React.Component<
     let validateResult = ValidateResult.Ok;
     if (value === "another") {
       this.props.onChangeParticipantIds([]);
-      validateResult = ValidateResult.AtLeastOnePersonNotPayer;
+      validateResult = ValidateResult.AtLeastOnePerson;
     } else {
       this.props.onChangeParticipantIds(people.map(person => person.id));
       validateResult = ValidateResult.Ok;
@@ -90,7 +89,7 @@ export default class ChooseParticipantInput extends React.Component<
   private handleSelectAllParticipantIds = (): void => {
     const { participantsInput } = this.state;
     const { selectedPayerId, participantIds } = this.props;
-    let newParticipantIds: number[] = participantIds;
+    const newParticipantIds: number[] = participantIds;
     participantsInput.map(person => {
       if (newParticipantIds.indexOf(person.id) === -1) {
         newParticipantIds.push(person.id);
@@ -98,23 +97,14 @@ export default class ChooseParticipantInput extends React.Component<
     });
     this.props.onChangeParticipantIds(newParticipantIds);
     this.setState({
-      validateResult: this.getValidateResult(newParticipantIds, selectedPayerId)
+      validateResult: getValidateResult(newParticipantIds, selectedPayerId)
     });
-  }
-
-  private getValidateResult(participantIds: number[], selectedPayerId: number) {
-    if (participantIds.length < 1 ||
-      participantIds.length === 1 && participantIds.indexOf(selectedPayerId) > -1) {
-      return ValidateResult.AtLeastOnePersonNotPayer
-    } else {
-      return ValidateResult.Ok
-    }
   }
 
   private handleUnSelectAllParticipantIds = (): void => {
     const { participantsInput } = this.state;
     const { participantIds, selectedPayerId } = this.props;
-    let newParticipantIds: number[] = participantIds;
+    const newParticipantIds: number[] = participantIds;
     participantsInput.map(person => {
       if (newParticipantIds.indexOf(person.id) > -1) {
         newParticipantIds.splice(newParticipantIds.indexOf(person.id), 1);
@@ -122,7 +112,7 @@ export default class ChooseParticipantInput extends React.Component<
     });
     this.props.onChangeParticipantIds(newParticipantIds);
     this.setState({
-      validateResult: this.getValidateResult(newParticipantIds, selectedPayerId)
+      validateResult: getValidateResult(newParticipantIds, selectedPayerId)
     });
   }
 
@@ -134,8 +124,8 @@ export default class ChooseParticipantInput extends React.Component<
   };
 
   private handleChangeNameParticipantInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-    let participantsInput: Person[] = [];
-    let nameParticipant = event.target.value;
+    const participantsInput: Person[] = [];
+    const nameParticipant = event.target.value;
     this.props.people.map(person => {
       if (person.name.toLowerCase().indexOf(nameParticipant.trim().toLowerCase()) > -1) {
         participantsInput.push(person);

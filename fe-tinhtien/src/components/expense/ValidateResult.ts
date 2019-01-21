@@ -6,5 +6,6 @@ export enum ValidateResult {
   NotNumberError = "Must be a number",
   MoreThan2DecimalError = "Must have up to two decimal places",
   AtLeastOnePersonNotPayer = "Please choose at least one person who is not the payer",
+  AtLeastOnePerson = "Please choose at least one person",
   Ok = ""
 }

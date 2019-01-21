@@ -16,6 +16,7 @@ import appConstant from "../../utils/appConstant";
 import { compareDateInYearMonthDay } from "../../utils/dateHelper";
 import { setStorage, getStorage } from "../../utils/localStorage";
 import ChooseParticipantInput from "./ChooseParticipantInput";
+import { getValidateResult } from "../../utils/validateResult";
 
 export interface ExpenseDialogProps {
   activityUrl: string;
@@ -135,13 +136,6 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
     return ValidateResult.Ok;
   }
 
-  private validateParticipantIds(participantIds: number[], selectedPayerId: number): ValidateResult {
-    if (participantIds.length < 1 || participantIds.length === 1 && participantIds.indexOf(selectedPayerId) > -1) {
-      return ValidateResult.AtLeastOnePersonNotPayer;
-    }
-    return ValidateResult.Ok;
-  }
-
   private handlePersonChange = (personId: string) => {
     this.setState({ selectedPayerId: parseInt(personId) });
   };
@@ -171,17 +165,14 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
       && this.updateParticipantIds(participantIds, expense!.participants!);
   }
 
-  private updateParticipantIds(participantIds: number[], people: Person[], ): boolean {
-    if (people.length === participantIds.length) {
-      return true;
-    }
+  private updateParticipantIds(participantIds: number[], people: Person[]): boolean {
     return JSON.stringify(people.map(person => person.id).sort()) === JSON.stringify(participantIds.sort());
   }
 
   render(): React.ReactNode {
     const validateDescriptionResult: ValidateResult = this.validateDescription(this.state.name);
     const validateAmountResult: ValidateResult = this.validateAmount(this.state.amount);
-    const validateParticipantIds: ValidateResult = this.validateParticipantIds(this.state.participantIds, this.state.selectedPayerId);
+    const validateParticipantIds: ValidateResult = getValidateResult(this.state.participantIds, this.state.selectedPayerId);
     const disableSubmitButton = this.noChangeInEditMode() || validateAmountResult !== ValidateResult.Ok ||
       validateDescriptionResult !== ValidateResult.Ok || validateParticipantIds !== ValidateResult.Ok;
     return (
