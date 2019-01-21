@@ -83,7 +83,8 @@ export default class ChooseParticipantInput extends React.Component<
     this.setState({
       selectAllParticipant: value,
       validateResult: validateResult,
-      nameParticipantInput: ""
+      nameParticipantInput: "",
+      participantsInput: people
     });
   }
 
