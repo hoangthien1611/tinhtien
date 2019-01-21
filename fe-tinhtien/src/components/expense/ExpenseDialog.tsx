@@ -145,11 +145,14 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
   };
 
   private getPayerIdByActivityUrl(): number {
-    const personId = getStorage(this.props.activityUrl);
-    if (personId != null) {
-      return parseInt(personId);
+    const personId = parseInt(getStorage(this.props.activityUrl) as string);
+    if (personId == null) {
+      return this.props.people[0].id;
     }
-    else return this.props.people[0].id;
+    const person = this.props.people.map(person => person.id).filter(id => id == personId);
+    if (person === undefined || person.length == 0)
+      return this.props.people[0].id;
+    return personId;
   }
 
   private inEditMode(): boolean {
