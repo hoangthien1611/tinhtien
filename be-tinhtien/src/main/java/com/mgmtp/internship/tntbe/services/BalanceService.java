@@ -5,7 +5,6 @@ import com.mgmtp.internship.tntbe.dto.FinancialStatus;
 import com.mgmtp.internship.tntbe.dto.PersonDTO;
 import com.mgmtp.internship.tntbe.entities.Expense;
 import com.mgmtp.internship.tntbe.entities.Person;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -13,12 +12,9 @@ import java.util.*;
 @Service
 public class BalanceService {
 
-    @Autowired
-    private ExpenseService expenseService;
-
-    public List<BalanceDTO> getBalances(List<Expense> expenses) {
+    public List<BalanceDTO> getBalances(List<Expense> expenses, List<Person> persons) {
         Map<Person, FinancialStatus> mapPersonBalance = getFinancialStatusOfEachPerson(expenses);
-        return parse(mapPersonBalance);
+        return parse(mapPersonBalance, persons);
     }
 
     private Map<Person, FinancialStatus> getFinancialStatusOfEachPerson(List<Expense> expenses) {
@@ -39,12 +35,15 @@ public class BalanceService {
         return mapPersonFinancialStatus;
     }
 
-    private List<BalanceDTO> parse(Map<Person, FinancialStatus> mapPersonFinancialStatus) {
+    private List<BalanceDTO> parse(Map<Person, FinancialStatus> mapPersonFinancialStatus, List<Person> persons) {
         List<BalanceDTO> listBalanceDTO = new ArrayList<>();
-        Set<Person> personIds = mapPersonFinancialStatus.keySet();
-        for (Person person : personIds) {
-            FinancialStatus financialStatus = mapPersonFinancialStatus.get(person);
-            listBalanceDTO.add(new BalanceDTO(new PersonDTO(person), financialStatus.getPaid(), financialStatus.getShouldPay()));
+        for (Person person : persons) {
+            if (mapPersonFinancialStatus.containsKey(person)) {
+                FinancialStatus financialStatus = mapPersonFinancialStatus.get(person);
+                listBalanceDTO.add(new BalanceDTO(new PersonDTO(person), financialStatus.getPaid(), financialStatus.getShouldPay()));
+            } else {
+                listBalanceDTO.add(new BalanceDTO(new PersonDTO(person), 0, 0));
+            }
         }
         return listBalanceDTO;
     }

@@ -4,9 +4,11 @@ import com.mgmtp.internship.tntbe.dto.Balance;
 import com.mgmtp.internship.tntbe.dto.BalanceDTO;
 import com.mgmtp.internship.tntbe.dto.PaymentDTO;
 import com.mgmtp.internship.tntbe.entities.Expense;
+import com.mgmtp.internship.tntbe.entities.Person;
 import com.mgmtp.internship.tntbe.services.BalanceService;
 import com.mgmtp.internship.tntbe.services.ExpenseService;
 import com.mgmtp.internship.tntbe.services.PaymentService;
+import com.mgmtp.internship.tntbe.services.PersonService;
 import com.mgmtp.internship.tntbe.utils.ListBalanceUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,10 +31,14 @@ public class PaymentController {
     @Autowired
     private ExpenseService expenseService;
 
+    @Autowired
+    private PersonService personService;
+
     @GetMapping("/{url}")
     public List<PaymentDTO> getList(@PathVariable String url) {
         List<Expense> expenses = expenseService.getAll(url);
-        List<BalanceDTO> balanceDTOS = balanceService.getBalances(expenses);
+        List<Person> persons = (List<Person>) personService.getPersons(url);
+        List<BalanceDTO> balanceDTOS = balanceService.getBalances(expenses, persons);
         return paymentService.getPayments(ListBalanceUtil.convertAndFilter(balanceDTOS));
     }
 }
