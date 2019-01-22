@@ -220,6 +220,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                     persons: this.state.persons.filter(p => p.id !== person.id),
                     commonErrorMessage: result.message
                 });
+                setTimeout(() => this.setState({ commonErrorMessage: undefined }), 1000);
             }
         } catch (error) {
             console.log(error);
