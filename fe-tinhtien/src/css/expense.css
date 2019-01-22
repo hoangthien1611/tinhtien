@@ -17,12 +17,22 @@
   word-wrap: break-word;
   white-space: pre-wrap;
 }
-.btn-add-expense {
-  position: absolute;
-  right: 40px;
-  margin-top: 10px;
-}
+
 .wrapper {
   max-width: 800px;
   margin: auto;
+}
+
+.btn-add-expense {
+  position: absolute;
+  left: 46%;
+  bottom: 10px;
+  height: 45px;
+  width: 45px;
+}
+
+@media (pointer:none), (pointer:coarse)  {
+  .btn-add-expense {
+    position: fixed;
+  }
 }

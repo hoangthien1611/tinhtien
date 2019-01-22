@@ -90,6 +90,7 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
             style={expenses.length === 0 ? { visibility: "hidden" } : { visibility: "visible" }}>
             {this.renderExpenses(expenses)}
           </List>
+          <div style={{ minHeight: '60px' }} />
           <Button
             disabled={!addable}
             className="btn-add-expense"
