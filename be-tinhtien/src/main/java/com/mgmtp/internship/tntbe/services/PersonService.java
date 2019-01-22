@@ -1,6 +1,5 @@
 package com.mgmtp.internship.tntbe.services;
 
-import com.mgmtp.internship.tntbe.dto.ErrorMessage;
 import com.mgmtp.internship.tntbe.dto.PersonDTO;
 import com.mgmtp.internship.tntbe.entities.Activity;
 import com.mgmtp.internship.tntbe.entities.Person;
@@ -28,14 +27,14 @@ public class PersonService {
     ExpenseRepository expenseRepository;
 
     public Person saveNewPerson(PersonDTO personDTO) {
-        if (personDTO.getName() != null && personDTO.getActivityUrl() != null ) {
+        if (personDTO.getName() != null && personDTO.getActivityUrl() != null) {
             if (personDTO.getName().trim().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Person Name is empty");
             } else if (personDTO.getActivityUrl().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Activity Url is empty");
             } else {
                 Activity activity = activityRepository.findByUrl(personDTO.getActivityUrl());
-                if (activity !=null) {
+                if (activity != null) {
                     Person person = personRepository.findByNameAndActivity(personDTO.getName(), activity);
                     if (person == null) {
                         return personRepository.save(new Person(personDTO.getName(), true, activity));
@@ -85,6 +84,8 @@ public class PersonService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This person is not existing in this activity!");
         } else if (!expenseRepository.findAllByPayer_Id(personDTO.getId()).isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can not delete this person because he/she has paid for something!");
+        } else if (!expenseRepository.findAllByParticipantsContains(optionalPerson.get()).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can not delete this person because he/she joined at least a expense!");
         } else {
             personRepository.delete(optionalPerson.get());
             return "{ \"message\": \"Delete person successfully!\" }";

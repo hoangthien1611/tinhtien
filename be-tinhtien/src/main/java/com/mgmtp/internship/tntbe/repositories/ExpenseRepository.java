@@ -12,4 +12,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     List<Expense> findAllByPayerInOrderByCreatedDateAsc(List<Person> people);
 
     List<Expense> findAllByPayer_Id(long id);
+
+    List<Expense> findAllByParticipantsContains(Person person);
 }
