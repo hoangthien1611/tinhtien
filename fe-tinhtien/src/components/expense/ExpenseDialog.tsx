@@ -257,8 +257,8 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
         <ChooseParticipantInput
           participantIds={participantIds}
           people={people}
-          selectedPayerId={selectedPayerId}
-          onChangeParticipantIds={this.handleChangeParticipantId} />
+          onChangeParticipantIds={this.handleChangeParticipantId}
+          validateResult={validateParticipantIdsResult} />
         {this.generateEmptyLine(false)}
         <DateInput onChange={this.handleDateChange} selectedDate={date} />
       </>

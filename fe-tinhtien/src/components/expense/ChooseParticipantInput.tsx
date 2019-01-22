@@ -7,21 +7,18 @@ import {
   Button,
   Icon
 } from "@com.mgmtp.a12/widgets";
-import { ValidateResult } from "./ValidateResult";
 import Person from "../../models/Person";
 import appConstant from "../../utils/appConstant";
 import "../../css/chooseParticipantInput.css";
-import { getValidateResult } from "../../utils/validateResult";
 
 interface ChooseParticipantInputProps {
-  selectedPayerId: number;
   people: Person[];
   participantIds: number[];
   onChangeParticipantIds: (participantIds: number[]) => void;
+  validateResult: string;
 }
 
 interface ChooseParticipantInputState {
-  validateResult: string;
   selectAllParticipant: string;
   nameParticipantInput: string;
   participantsInput: Person[];
@@ -34,7 +31,6 @@ export default class ChooseParticipantInput extends React.Component<
   constructor(props: ChooseParticipantInputProps) {
     super(props);
     this.state = {
-      validateResult: getValidateResult(this.props.participantIds, this.props.selectedPayerId),
       selectAllParticipant: this.props.participantIds.length === this.props.people.length ? "all" : "another",
       nameParticipantInput: "",
       participantsInput: props.people
@@ -59,30 +55,22 @@ export default class ChooseParticipantInput extends React.Component<
 
   private handleChangeCheckboxIdPerson(idPerson: number): void {
     const { participantIds } = this.props;
-    const { selectedPayerId } = this.props;
     if (participantIds.indexOf(idPerson) == -1) {
       participantIds.push(idPerson);
     } else {
       participantIds.splice(participantIds.indexOf(idPerson), 1);
     }
-    this.setState({
-      validateResult: getValidateResult(participantIds, selectedPayerId)
-    });
     this.props.onChangeParticipantIds(participantIds);
   }
 
   private handleSelectPersonChanged(value: string, people: Person[]): void {
-    let validateResult = ValidateResult.Ok;
     if (value === "another") {
       this.props.onChangeParticipantIds([]);
-      validateResult = ValidateResult.AtLeastOnePerson;
     } else {
       this.props.onChangeParticipantIds(people.map(person => person.id));
-      validateResult = ValidateResult.Ok;
     }
     this.setState({
       selectAllParticipant: value,
-      validateResult: validateResult,
       nameParticipantInput: "",
       participantsInput: people
     });
@@ -90,7 +78,7 @@ export default class ChooseParticipantInput extends React.Component<
 
   private handleSelectAllParticipantIds = (): void => {
     const { participantsInput } = this.state;
-    const { selectedPayerId, participantIds } = this.props;
+    const { participantIds } = this.props;
     const newParticipantIds: number[] = participantIds;
     participantsInput.map(person => {
       if (newParticipantIds.indexOf(person.id) === -1) {
@@ -98,14 +86,11 @@ export default class ChooseParticipantInput extends React.Component<
       }
     });
     this.props.onChangeParticipantIds(newParticipantIds);
-    this.setState({
-      validateResult: getValidateResult(newParticipantIds, selectedPayerId)
-    });
   }
 
   private handleUnSelectAllParticipantIds = (): void => {
     const { participantsInput } = this.state;
-    const { participantIds, selectedPayerId } = this.props;
+    const { participantIds } = this.props;
     const newParticipantIds: number[] = participantIds;
     participantsInput.map(person => {
       if (newParticipantIds.indexOf(person.id) > -1) {
@@ -113,9 +98,6 @@ export default class ChooseParticipantInput extends React.Component<
       }
     });
     this.props.onChangeParticipantIds(newParticipantIds);
-    this.setState({
-      validateResult: getValidateResult(newParticipantIds, selectedPayerId)
-    });
   }
 
   private onCancelSearchParticipant = (): void => {
@@ -140,8 +122,8 @@ export default class ChooseParticipantInput extends React.Component<
   }
 
   render() {
-    const { people } = this.props;
-    const { selectAllParticipant, validateResult, participantsInput, nameParticipantInput } = this.state;
+    const { people, validateResult } = this.props;
+    const { selectAllParticipant, participantsInput, nameParticipantInput } = this.state;
     return (
       <>
         <Radio
