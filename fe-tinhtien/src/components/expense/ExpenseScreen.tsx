@@ -217,8 +217,7 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
         if (newExpenses) { this.setState({ expenses: newExpenses }); }
       },
       (errorMessage: string) => {
-        const loadData = errorMessage === "The expense must have at least one participant!";
-        this.showErrorDialog(errorMessage, loadData);
+        this.showErrorDialog(errorMessage, true);
       },
       () => {
         this.toggleLoading();

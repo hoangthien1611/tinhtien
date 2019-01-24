@@ -276,8 +276,7 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                     this.setState({
                         typedInput: false
                     });
-                    const loadData= !(result.message === "Activity doesn't exist" || result.message === "Null Pointer Exception");
-                    this.showErrorDialog(result.message, loadData);
+                    this.showErrorDialog(result.message, true);
                 } else {
                     this.setState({
                         persons: [...persons, result],
