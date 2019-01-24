@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PersonRepository extends JpaRepository<Person, Long> {
-    Person findByNameAndActivity(String name, Activity activity);
+    Person findByNameIgnoreCaseAndActivity(String name, Activity activity);
 }

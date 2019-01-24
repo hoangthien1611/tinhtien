@@ -35,7 +35,7 @@ public class PersonService {
             } else {
                 Activity activity = activityRepository.findByUrl(personDTO.getActivityUrl());
                 if (activity != null) {
-                    Person person = personRepository.findByNameAndActivity(personDTO.getName(), activity);
+                    Person person = personRepository.findByNameIgnoreCaseAndActivity(personDTO.getName(), activity);
                     if (person == null) {
                         return personRepository.save(new Person(personDTO.getName(), true, activity));
                     } else {
@@ -64,7 +64,7 @@ public class PersonService {
             Person oldPerson = personRepository.findById(person.getId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Person is not found!"));
             Activity activity = oldPerson.getActivity();
-            if (personRepository.findByNameAndActivity(person.getName(), activity) == null) {
+            if (personRepository.findByNameIgnoreCaseAndActivity(person.getName(), activity) == null) {
                 oldPerson.setName(person.getName());
                 return personRepository.save(oldPerson);
             } else {
