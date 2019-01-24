@@ -16,5 +16,8 @@ export default Object.freeze({
         EXPENSE_ADD_NEW: "Add a new expense",
         EXPENSE_EDIT: "Edit your expense",
         EXPENSE_PARTICIPANT: "Participants:"
+    },
+    number: {
+        EXPENSE_MAX_AMOUNT: 1000000000000000
     }
 });

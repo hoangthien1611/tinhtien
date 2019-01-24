@@ -131,6 +131,8 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
     if (isNaN(amountNumber) || !trimedAmount.match(/^-?\d*(\.\d*)?$/))
       return ValidateResult.NotNumberError;
     if (amountNumber <= 0) return ValidateResult.ZeroOrNegativeError;
+    if(amountNumber > appConstant.number.EXPENSE_MAX_AMOUNT)
+      return ValidateResult.GreaterThanError;
     if (!trimedAmount.match(/^\d*(\.\d{0,2})?$/))
       return ValidateResult.MoreThan2DecimalError;
     return ValidateResult.Ok;

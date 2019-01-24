@@ -68,7 +68,7 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
 
     getPersons(this.props.activityUrl, (persons: Person[]) => {
       if (this._isMounted) {
-        this.setState({ persons, addable: persons.length > 0 });
+        this.setState({ persons, addable: persons.length > 1 });
       }
     },
       (errorMessage: string) => {
