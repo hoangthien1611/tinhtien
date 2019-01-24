@@ -42,12 +42,21 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
         }
     }
 
+    private showErrorDialog(errorMessage: string, withRefresh: boolean) {
+      if (withRefresh) this.loadData();
+      this.setState({ commonErrorMessage: errorMessage });
+      setTimeout(() => this.setState({ commonErrorMessage: undefined }), 2000);
+    }
 
-    async componentDidMount(): Promise<void> {
+    async loadData(): Promise<void> {
+      this.toggleLoading();
+      await this.getListPerson(this.props.activityUrl);
+      this.toggleLoading();
+    }
+
+    componentDidMount() {
         this._isMounted = true;
-        this.toggleLoading();
-        await this.getListPerson(this.props.activityUrl);
-        this.toggleLoading();
+        this.loadData();
     }
 
     componentWillUnmount() {
@@ -65,9 +74,10 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                 });
             }
         } catch (error) {
-            console.log(error);
+          this.showErrorDialog("There is something wrong with the server right now.", false);
         }
     }
+
     render(): React.ReactNode {
         let { persons, enteringName, editingPersonIndex, errorMessageEditInput, loading, commonErrorMessage, typedInput } = this.state;
         enteringName = enteringName ? enteringName : "";
@@ -162,10 +172,10 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
             const result = await updateData('api/person', { name: this.trimName((newName).trim()), id: person.id });
             if (result.status) {
                 this.setState({
-                    commonErrorMessage: result.message,
                     typedInput: false
                 });
-                setTimeout(() => this.setState({ commonErrorMessage: undefined }), 3000);
+                this.showErrorDialog(result.message, true);
+                this.onCancelEdit();
             } else {
                 const { persons } = this.state;
                 const personsEdited = persons.map(p => {
@@ -216,22 +226,21 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
     onClearButtonClick = (): void => {
         this.setState({ enteringName: "" })
     }
+
     onDeletePerson = async (person: Person): Promise<void> => {
         try {
             this.toggleLoading();
             const result = await deleteData('api/person', { id: person.id, activityUrl: this.props.activityUrl });
             this.toggleLoading();
             if (result.status) {
-                this.setState({
-                    commonErrorMessage: result.message
-                });
-                setTimeout(() => this.setState({ commonErrorMessage: undefined }), 3000);
+              const loadData= !(result.message === "Can not delete this person because he/she has paid for something!"
+              || result.message === "Can not delete this person because he/she joined at least a expense!");
+              this.showErrorDialog(result.message, loadData);
             } else {
                 this.setState({
                     persons: this.state.persons.filter(p => p.id !== person.id),
-                    commonErrorMessage: result.message
                 });
-                setTimeout(() => this.setState({ commonErrorMessage: undefined }), 1000);
+                this.showErrorDialog(result.message, false);
                 if (person.id == Number(getStorage(this.props.activityUrl))) {
                     removeStorage(this.props.activityUrl);
                 }
@@ -265,10 +274,10 @@ export class PeopleScreen extends React.Component<PeopleScreenProps, PeopleScree
                 const result = await addData('api/person', { name: this.trimName((enteringName || "").trim()), activityUrl });
                 if (result.status) {
                     this.setState({
-                        commonErrorMessage: result.message,
                         typedInput: false
                     });
-                    setTimeout(() => this.setState({ commonErrorMessage: undefined }), 3000);
+                    const loadData= !(result.message === "Activity doesn't exist" || result.message === "Null Pointer Exception");
+                    this.showErrorDialog(result.message, loadData);
                 } else {
                     this.setState({
                         persons: [...persons, result],

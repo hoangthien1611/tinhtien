@@ -32,11 +32,11 @@ export interface ExpenseScreenState {
   deletingExpense: boolean;
   focusExpense?: Expense;
   addable: boolean;
-  deleteMessage?: string
+  errorMessage?: string;
 }
 
 export default class ExpenseScreen extends React.Component<ExpenseScreenProps, ExpenseScreenState> {
-  _isMounted:boolean = false;
+  _isMounted: boolean = false;
   state: ExpenseScreenState = {
     expenses: [],
     persons: [],
@@ -45,11 +45,16 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
     editingExpense: false,
     deletingExpense: false,
     addable: false,
-    deleteMessage: undefined
+    errorMessage: undefined,
   };
 
-  async componentDidMount(): Promise<void> {
-    this._isMounted = true;
+  private showErrorDialog(errorMessage: string, withRefresh: boolean) {
+    if (withRefresh) this.loadData();
+    this.setState({ errorMessage: errorMessage });
+    setTimeout(() => this.setState({ errorMessage: undefined }), 2000);
+  }
+
+  async loadData(): Promise<void>  {
     this.toggleLoading();
     getExpenses(
       this.props.activityUrl,
@@ -58,8 +63,8 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
           this.setState({ expenses });
         }
       },
-      (errorMessage: string) => {
-        console.log(errorMessage);
+      (errorMessage: string = "There is something wrong with the server right now.") => {
+        this.showErrorDialog(errorMessage, false)
       },
       () => {
         this.toggleLoading();
@@ -71,9 +76,15 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
         this.setState({ persons, addable: persons.length > 1 });
       }
     },
-      (errorMessage: string) => {
-        console.log(errorMessage);
+      (errorMessage: string = "There is something wrong with the server right now.") => {
+        this.showErrorDialog(errorMessage, false);
       })
+      this.setState({ errorMessage: undefined });
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+    this.loadData();
   }
 
   componentWillUnmount() {
@@ -81,7 +92,7 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
   }
 
   render() {
-    const { expenses, loading, addable, persons, addingExpense, editingExpense, deletingExpense, focusExpense, deleteMessage } = this.state;
+    const { expenses, loading, addable, persons, addingExpense, editingExpense, deletingExpense, focusExpense, errorMessage } = this.state;
     const { activityUrl } = this.props;
     return (
       <>
@@ -130,11 +141,11 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
             onClose={this.cancelDelete}
           />
         )}
-        {deleteMessage && (
+        {errorMessage && (
           <DeleteDialog
-            variant={deleteMessage.indexOf("successfully") > 0 ? Variant.succes : Variant.error}
+            variant={errorMessage.indexOf("successfully") > 0 ? Variant.succes : Variant.error}
             title={"Notification"}
-            message={deleteMessage}
+            message={errorMessage}
           />
         )}
         {loading && <ProgressIndicator />}
@@ -188,7 +199,7 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
         }
       },
       (errorMessage: string) => {
-        console.log(errorMessage);
+        this.showErrorDialog(errorMessage, true);
       },
       () => {
         this.toggleLoading();
@@ -206,7 +217,8 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
         if (newExpenses) { this.setState({ expenses: newExpenses }); }
       },
       (errorMessage: string) => {
-        console.log(errorMessage);
+        const loadData = errorMessage === "The expense must have at least one participant!";
+        this.showErrorDialog(errorMessage, loadData);
       },
       () => {
         this.toggleLoading();
@@ -224,21 +236,23 @@ export default class ExpenseScreen extends React.Component<ExpenseScreenProps, E
     );
   }
 
-  onDeleteSuccessfully = (deleteMessage: string) => {
+  onDeleteSuccessfully = (errorMessage: string) => {
     this.setState({
-      deleteMessage,
+      errorMessage,
       deletingExpense: false,
       expenses: this.state.expenses.filter(expense => expense.id !== this.state.focusExpense!.id)
     });
-    setTimeout(() => this.setState({ deleteMessage: undefined }), 1000);
+    setTimeout(() => {
+      this.setState({ errorMessage: undefined });
+    }, 1000);
   }
 
-  onDeleteFailure = (deleteMessage: string) => {
+  onDeleteFailure = (errorMessage: string) => {
     this.setState({
-      deleteMessage,
+      errorMessage,
       deletingExpense: false,
     });
-    setTimeout(() => this.setState({ deleteMessage: undefined }), 3000);
+    this.showErrorDialog(errorMessage, true);
   }
 
   cancelDelete = () => {

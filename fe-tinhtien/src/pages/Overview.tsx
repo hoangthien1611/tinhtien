@@ -91,7 +91,6 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
     //lastActiveMenu will be updated first in componentWillReceiveProps before activeMenu
     //so lastActiveMenu === activeMenu means the menu had been changed.
     if (this.state.lastActiveMenu === this.state.activeMenu) {
-      console.log(this.state.lastActiveMenu);
       await this.getActivityName(this.props.match.params.code);
       if (this._isMounted) {
         this.setState({
