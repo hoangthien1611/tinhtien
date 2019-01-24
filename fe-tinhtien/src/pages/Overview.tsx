@@ -3,7 +3,10 @@ import {
   ApplicationFrame,
   MenuItem,
   ApplicationHeader,
-  FlyoutMenu
+  FlyoutMenu,
+  Button,
+  Icon,
+  ModalNotification
 } from "@com.mgmtp.a12/widgets";
 import { RouteComponentProps, Route } from "react-router-dom";
 import { PeopleScreen } from "../components/people/PeopleScreen";
@@ -11,7 +14,7 @@ import ExpenseScreen from "../components/expense/ExpenseScreen";
 import OutstandingPayMentScreen from "../components/outstandingpayment/OutStandingPaymentScreen";
 import minorLogo from "../images/minor_logo.png";
 import BalanceScreen from "../components/balance/BalanceScreen";
-import "../css/overview.css"
+import data from "../data/information.json";
 
 const menuItems = [
   { label: "people" },
@@ -25,6 +28,7 @@ interface OverviewState {
   lastActiveMenu: string;
   activityName: string;
   activityUrl: string;
+  showPopup: boolean;
 }
 
 interface OverviewProps extends RouteComponentProps<any> { }
@@ -39,6 +43,7 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
       lastActiveMenu: "",
       activityName: "",
       activityUrl: this.props.match.params.code,
+      showPopup: false
     }
   }
 
@@ -78,7 +83,7 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
   }
 
   async componentDidUpdate() {
-    
+
     const currentTab = this.props.match.params.tab;
     if ((currentTab != "people" && currentTab != "expenses" && currentTab != "balance" && currentTab != "outstanding" && currentTab != undefined)) {
       this.props.history.replace("/404");
@@ -179,7 +184,7 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
   }
 
   render(): React.ReactNode {
-    const { activityUrl, activityName } = this.state;
+    const { activityUrl, activityName, showPopup } = this.state;
 
     return (
       <div>
@@ -193,12 +198,12 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
                   </a>,
                   <p>TinhTien</p>
                 ]}
-                rightSlots={
-                  <div id="rightSlot">
-                    {this.shortenActivityName(activityName, window.innerWidth >= 800 ? 45 : window.innerWidth / 20 + 5)}
-                    {/* Magic numbers, work best with screen width range from 300 to infinite, since the whole form caps at 800px */}
-                  </div>
-                } />
+                rightSlots={[
+                  <p>{this.shortenActivityName(activityName, window.innerWidth >= 800 ? 42 : window.innerWidth / 20 + 2)}</p>,
+                  <Button iconButton secondary style={{ padding: 0, border: 0 }}
+                    onClick={this.showPopup} icon={<Icon>info</Icon>} title="Something helpful" />
+                ]}
+              />
               <FlyoutMenu type="horizontal" items={this.getMenuItems()} />
             </div>
           }
@@ -207,7 +212,65 @@ export default class Overview extends React.Component<OverviewProps, OverviewSta
             this.renderTab(activityUrl)
           }
         />
+        {showPopup && <ModalNotification
+          title={"Something helpful for you"}
+          footer={
+            <Button className="h_floatRight" onClick={this.closePopup}>Close</Button>
+          }
+        >
+          {this.generateInformation()}
+        </ModalNotification>}
       </div>
+    );
+  }
+
+  private showPopup = (): void => {
+    this.setState({
+      showPopup: true
+    });
+  }
+
+  private closePopup = (): void => {
+    this.setState({
+      showPopup: false
+    })
+  }
+
+  private generateInformation() {
+    return (
+      <>
+        {data.information.overview}
+        <br />
+        <br />
+        {this.generateInformationForOneTab("People", data.information.people)}
+        <br />
+        {this.generateInformationForOneTab("Expenses", data.information.expenses)}
+        <br />
+        {this.generateInformationForOneTab("Balance", data.information.balance)}
+        <br />
+        {this.generateInformationForOneTab("Outstanding", data.information.outstanding)}
+        <br />
+        <br />
+      </>
+    );
+  }
+
+  private generateInformationForOneTab(tabName: string, tabContent: string[]) {
+    return (
+      <>
+        <b>&nbsp;&nbsp;&nbsp;&diams; {tabName}</b>
+        <br />
+        {
+          tabContent.map(item => {
+            return (
+              <>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9679; {item}
+                <br />
+              </>
+            );
+          })
+        }
+      </>
     );
   }
 }
