@@ -69,6 +69,11 @@ export default class ExpenseDialog extends React.Component<ExpenseDialogProps, E
       }
   }
 
+  componentDidMount(): void {
+    let amountField: HTMLInputElement = document.getElementsByClassName("field__text")[1] as HTMLInputElement;
+    amountField.type = "number";
+  }
+
   private handleChangeParticipantId = (participantIds: number[]) => {
     this.setState({
       participantIds: participantIds
