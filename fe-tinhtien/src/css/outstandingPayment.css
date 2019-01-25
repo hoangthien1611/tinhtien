@@ -2,7 +2,8 @@
   width: 85px;
 } */
 .paidPerson-name,
-.receivePerson-name {
+.receivePerson-name,
+.amount {
   font-weight: bold;
 }
 .paidPerson-name {
@@ -12,5 +13,5 @@
   color: rgb(29, 151, 45);
 }
 .amount {
-    color: cornflowerblue
+    color: blue
 }
